@@ -1,9 +1,10 @@
 {
   "expo": {
-    "name": "chloe-learns",
+    "name": "Chloe Learns Math",
     "slug": "chloe-learns",
     "version": "1.0.0",
     "orientation": "portrait",
+    "scheme": "chloelearns",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -21,10 +22,14 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.chloelearns"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-router"
+    ]
   }
 }

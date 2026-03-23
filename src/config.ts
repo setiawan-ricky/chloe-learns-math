@@ -1,0 +1,28 @@
+export const BOUNCE = {
+  IMG_SIZE: 110,
+  SPEED_MIN: 3.5,
+  SPEED_RANGE: 2.5,
+  SPEED_MULTIPLIER: 1.5 * 0.75,
+  MIN_COMPONENT_SPEED: 2,
+  EXPLOSION_DISPLAY_MS: 1000,
+  EXPLOSION_FADE_MS: 500,
+} as const;
+
+export const GAME = {
+  ROUND_SIZE: 5,
+  TIMER_EASY: 30,
+  TIMER_HARD: 20,
+  TIMER_WARN_EASY: 8,
+  TIMER_WARN_HARD: 5,
+  MAX_DIGITS: 2,
+  NUMBER_RANGE: { min: 1, max: 10 },
+  CORRECT_SPLASH_MS: 1000,
+  WRONG_ADVANCE_MS: 800,
+  WRONG_RESET_MS: 600,
+} as const;
+
+export const HISTORY = {
+  MAX_ENTRIES: 50,
+  STORAGE_KEY: 'game_history',
+  SCORE_KEY: 'math_score',
+} as const;
