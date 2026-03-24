@@ -25,4 +25,5 @@ export const HISTORY = {
   MAX_ENTRIES: 50,
   STORAGE_KEY: 'game_history',
   SCORE_KEY: 'math_score',
+  QUESTION_STATS_KEY: 'question_stats',
 } as const;

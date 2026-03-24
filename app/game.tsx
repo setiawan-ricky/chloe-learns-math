@@ -13,7 +13,7 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { AUDIO, CELEBRATIONS, pickRandom } from '../src/assets';
-import { getScore, incrementScore, saveHistoryEntry } from '../src/history';
+import { getScore, incrementScore, recordQuestionResult, saveHistoryEntry } from '../src/history';
 import { GAME } from '../src/config';
 import { playRandomSound, unloadAll } from '../src/sound';
 
@@ -143,12 +143,14 @@ export default function GameScreen() {
       setTimerColor(next <= warnAt ? '#F44336' : '#757575');
       if (next <= 0) {
         stopTimer();
+        const q = questionRef.current;
+        recordQuestionResult(game, q.num1, q.num2, false);
         playRandomSound(AUDIO.timeout);
         setAnswerColor('#F44336');
         trackedTimeout(() => nextQuestionOrEnd(), WRONG_ADVANCE_MS);
       }
     }, 1000);
-  }, [timerSecs, warnAt, stopTimer, trackedTimeout, nextQuestionOrEnd]);
+  }, [game, timerSecs, warnAt, stopTimer, trackedTimeout, nextQuestionOrEnd]);
 
   const startRound = useCallback(() => {
     stopTimer();
@@ -199,6 +201,8 @@ export default function GameScreen() {
             setTimerColor(next <= warnAt ? '#F44336' : '#757575');
             if (next <= 0) {
               stopTimer();
+              const q = questionRef.current;
+              recordQuestionResult(game, q.num1, q.num2, false);
               playRandomSound(AUDIO.timeout);
               setAnswerColor('#F44336');
               trackedTimeout(() => nextQuestionOrEnd(), WRONG_ADVANCE_MS);
@@ -208,7 +212,7 @@ export default function GameScreen() {
       }
     });
     return () => sub.remove();
-  }, [stopTimer, warnAt, trackedTimeout, nextQuestionOrEnd]);
+  }, [game, stopTimer, warnAt, trackedTimeout, nextQuestionOrEnd]);
 
   useEffect(() => {
     startRound();
@@ -230,6 +234,7 @@ export default function GameScreen() {
 
     if (answer === correct) {
       stopTimer();
+      recordQuestionResult(game, num1, num2, true);
       incrementScore().then(s => { scoreRef.current = s; setScore(s); });
       roundCorrectRef.current += 1;
       setRoundCorrect(c => c + 1);
@@ -243,6 +248,7 @@ export default function GameScreen() {
         if (phaseRef.current === 'playing') startTimer();
       }, CORRECT_SPLASH_MS);
     } else {
+      recordQuestionResult(game, num1, num2, false);
       playRandomSound(AUDIO.incorrect);
       setAnswerColor('#F44336');
       if (mode === 'HARD') {

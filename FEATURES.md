@@ -6,8 +6,11 @@ Changes are always made here first, then ported to legacy.
 
 ## Home Screen
 
-- [x] Title "Chloe Learns Math" displayed at top
+- [x] Title with heart icon before "chloe" (light pink) and unicorn icon after "learns math" (light purple)
 - [x] Title plays `chloe-learns-math.mp3` on tap
+- [x] Bubblegum Sans font applied throughout all screens
+- [x] All text lowercase throughout the app
+- [x] Blob-shaped image buttons (green=easy, red=hard, blue=history/stats)
 - [x] Two bouncing character images with elastic collision physics
 - [x] Tap a character to explode it (shows explosion image, fades out, respawns)
 - [x] Laser sound (`laser.mp3`) plays on character tap
@@ -40,6 +43,16 @@ Changes are always made here first, then ported to legacy.
 - [x] Perfect score: celebration image + "all correct" audio
 - [x] Score <= 1: "completion bad" audio
 - [x] Other scores: "completion" audio
+
+- [x] Game pauses timer when app is minimized, resumes on return
+
+## Stats Screen
+
+- [x] Per-question score tracking (+1 correct, -1 wrong/timeout)
+- [x] Sortable table (by question, score, attempts) with tap-to-toggle direction
+- [x] Color-coded scores (green=good, red=struggling)
+- [x] Reset button requiring 7 taps to reset all data (scores, history, stats)
+- [x] Explanation text showing tap progress
 
 ## History Screen
 

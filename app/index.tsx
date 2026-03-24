@@ -268,11 +268,18 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <TouchableOpacity activeOpacity={0.8} style={styles.historyBtn} onPress={() => router.push('/history')}>
-        <ImageBackground source={BTN_BLUE} style={styles.btnBgHistory} resizeMode="contain">
-          <Text style={styles.historyBtnText}>history</Text>
-        </ImageBackground>
-      </TouchableOpacity>
+      <View style={styles.bottomRow}>
+        <TouchableOpacity activeOpacity={0.8} style={styles.bottomBtn} onPress={() => router.push('/history')}>
+          <ImageBackground source={BTN_BLUE} style={styles.btnBgBottom} resizeMode="contain">
+            <Text style={styles.bottomBtnText}>history</Text>
+          </ImageBackground>
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.8} style={styles.bottomBtn} onPress={() => router.push('/stats')}>
+          <ImageBackground source={BTN_BLUE} style={styles.btnBgBottom} resizeMode="contain">
+            <Text style={styles.bottomBtnText}>stats</Text>
+          </ImageBackground>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -294,8 +301,9 @@ const styles = StyleSheet.create({
   gameBtnText:   { color: '#fff', fontSize: 26, fontFamily: 'BubblegumSans_400Regular',
                    textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 3 },
   divider:       { width: 1, backgroundColor: '#E0E0E0', marginHorizontal: 12 },
-  historyBtn:    { alignSelf: 'center', marginBottom: 20 },
-  btnBgHistory:  { width: 200, height: 90, justifyContent: 'center', alignItems: 'center' },
-  historyBtnText:{ color: '#fff', fontSize: 22, fontFamily: 'BubblegumSans_400Regular',
+  bottomRow:     { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 20 },
+  bottomBtn:     {},
+  btnBgBottom:   { width: 160, height: 80, justifyContent: 'center', alignItems: 'center' },
+  bottomBtnText: { color: '#fff', fontSize: 20, fontFamily: 'BubblegumSans_400Regular',
                    textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 3 },
 });
