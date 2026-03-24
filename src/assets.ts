@@ -10,10 +10,15 @@ export const CHARACTERS = [
   require('../assets/images/characters/mermaid.png'),
   require('../assets/images/characters/princess.png'),
   require('../assets/images/characters/rainbow.png'),
-  require('../assets/images/characters/smiley.png'),
+
   require('../assets/images/characters/snowflake.png'),
   require('../assets/images/characters/star.png'),
   require('../assets/images/characters/unicorn.png'),
+  require('../assets/images/characters/penguin.png'),
+  require('../assets/images/characters/panda.png'),
+  require('../assets/images/characters/kitten.png'),
+  require('../assets/images/characters/bunny.png'),
+  require('../assets/images/characters/owl.png'),
 ];
 
 export const CELEBRATIONS = [
@@ -52,7 +57,7 @@ export const AUDIO = {
   correct: [
     require('../assets/audio/correct/absolutely-right.mp3'),
     require('../assets/audio/correct/amazing.mp3'),
-    require('../assets/audio/correct/easy-peasy-lemon-squeezy.mp3'),
+
     require('../assets/audio/correct/looks-good-to-me.mp3'),
     require('../assets/audio/correct/nice-work.mp3'),
     require('../assets/audio/correct/that-s-correct-chloe.mp3'),
