@@ -16,20 +16,25 @@ function questionKey(game: string, num1: number, num2: number): string {
   return `${game}:${num1}${op}${num2}`;
 }
 
-export async function recordQuestionResult(
+let statsMutex: Promise<void> = Promise.resolve();
+
+export function recordQuestionResult(
   game: string, num1: number, num2: number, correct: boolean,
 ): Promise<void> {
-  try {
-    const raw = await AsyncStorage.getItem(HISTORY.QUESTION_STATS_KEY);
-    const stats: Record<string, QuestionStat> = raw ? JSON.parse(raw) : {};
-    const k = questionKey(game, num1, num2);
-    if (!stats[k]) {
-      stats[k] = { key: k, game, num1, num2, score: 0, attempts: 0 };
-    }
-    stats[k].score += correct ? 1 : -1;
-    stats[k].attempts += 1;
-    await AsyncStorage.setItem(HISTORY.QUESTION_STATS_KEY, JSON.stringify(stats));
-  } catch {}
+  statsMutex = statsMutex.then(async () => {
+    try {
+      const raw = await AsyncStorage.getItem(HISTORY.QUESTION_STATS_KEY);
+      const stats: Record<string, QuestionStat> = raw ? JSON.parse(raw) : {};
+      const k = questionKey(game, num1, num2);
+      if (!stats[k]) {
+        stats[k] = { key: k, game, num1, num2, score: 0, attempts: 0 };
+      }
+      stats[k].score += correct ? 1 : -1;
+      stats[k].attempts += 1;
+      await AsyncStorage.setItem(HISTORY.QUESTION_STATS_KEY, JSON.stringify(stats));
+    } catch {}
+  });
+  return statsMutex;
 }
 
 export async function loadQuestionStats(): Promise<QuestionStat[]> {
@@ -43,11 +48,54 @@ export async function loadQuestionStats(): Promise<QuestionStat[]> {
   }
 }
 
+export interface MistakeEntry {
+  key:      string;  // e.g. "Addition:3+5"
+  game:     string;
+  num1:     number;
+  num2:     number;
+  answer:   number | null;  // null = timeout
+  correct:  number;
+  date:     string;
+}
+
+export async function recordMistake(
+  game: string, num1: number, num2: number, answer: number | null,
+): Promise<void> {
+  try {
+    const k = questionKey(game, num1, num2);
+    const correctAns = game === 'Minus' ? num1 - num2 : num1 + num2;
+    const date = new Date().toLocaleDateString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
+    const entry: MistakeEntry = { key: k, game, num1, num2, answer, correct: correctAns, date };
+    const raw = await AsyncStorage.getItem(HISTORY.MISTAKE_LOG_KEY);
+    let log: MistakeEntry[] = [];
+    if (raw) { try { log = JSON.parse(raw); } catch { log = []; } }
+    log.unshift(entry);
+    if (log.length > HISTORY.MAX_MISTAKES) log.length = HISTORY.MAX_MISTAKES;
+    await AsyncStorage.setItem(HISTORY.MISTAKE_LOG_KEY, JSON.stringify(log));
+  } catch {}
+}
+
+export async function loadMistakes(questionKey?: string): Promise<MistakeEntry[]> {
+  try {
+    const raw = await AsyncStorage.getItem(HISTORY.MISTAKE_LOG_KEY);
+    if (!raw) return [];
+    const log: MistakeEntry[] = JSON.parse(raw);
+    if (questionKey) return log.filter(m => m.key === questionKey);
+    return log;
+  } catch {
+    return [];
+  }
+}
+
 export async function resetAllData(): Promise<void> {
   await AsyncStorage.multiRemove([
     HISTORY.STORAGE_KEY,
     HISTORY.SCORE_KEY,
     HISTORY.QUESTION_STATS_KEY,
+    HISTORY.MISTAKE_LOG_KEY,
   ]);
 }
 

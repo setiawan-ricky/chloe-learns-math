@@ -26,4 +26,6 @@ export const HISTORY = {
   STORAGE_KEY: 'game_history',
   SCORE_KEY: 'math_score',
   QUESTION_STATS_KEY: 'question_stats',
+  MISTAKE_LOG_KEY: 'mistake_log',
+  MAX_MISTAKES: 500,
 } as const;

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { loadQuestionStats, QuestionStat, resetAllData } from '../src/history';
+import { loadMistakes, loadQuestionStats, MistakeEntry, QuestionStat, resetAllData } from '../src/history';
 
 type SortKey = 'question' | 'accuracy' | 'attempts';
 type SortDir = 'asc' | 'desc';
@@ -26,10 +26,19 @@ export default function StatsScreen() {
   const [sortKey, setSortKey] = useState<SortKey>('accuracy');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [resetCount, setResetCount] = useState(0);
+  const [expandedKey, setExpandedKey] = useState<string | null>(null);
+  const [mistakes, setMistakes] = useState<MistakeEntry[]>([]);
   const RESET_TAPS = 7;
 
   const load = useCallback(() => { loadQuestionStats().then(setStats); }, []);
   useEffect(() => { load(); }, [load]);
+
+  async function onRowTap(key: string) {
+    if (expandedKey === key) { setExpandedKey(null); return; }
+    const m = await loadMistakes(key);
+    setMistakes(m);
+    setExpandedKey(key);
+  }
 
   const sorted = [...stats].sort((a, b) => {
     let cmp = 0;
@@ -108,13 +117,32 @@ export default function StatsScreen() {
 
             {sorted.map(s => {
               const pct = accuracy(s);
+              const isExpanded = expandedKey === s.key;
               return (
                 <View key={s.key}>
-                  <View style={styles.row}>
-                    <Text style={[styles.cell, { flex: 3 }]}>{formatQuestion(s)}</Text>
-                    <Text style={[styles.cell, { flex: 1, textAlign: 'center', color: accuracyColor(pct) }]}>{pct}%</Text>
-                    <Text style={[styles.cell, { flex: 1, textAlign: 'center' }]}>{s.attempts}</Text>
-                  </View>
+                  <TouchableOpacity activeOpacity={0.7} onPress={() => onRowTap(s.key)}>
+                    <View style={[styles.row, isExpanded && styles.rowExpanded]}>
+                      <Text style={[styles.cell, { flex: 3 }]}>{formatQuestion(s)}</Text>
+                      <Text style={[styles.cell, { flex: 1, textAlign: 'center', color: accuracyColor(pct) }]}>{pct}%</Text>
+                      <Text style={[styles.cell, { flex: 1, textAlign: 'center' }]}>{s.attempts}</Text>
+                    </View>
+                  </TouchableOpacity>
+                  {isExpanded && (
+                    <View style={styles.detailPanel}>
+                      {mistakes.length === 0 ? (
+                        <Text style={styles.detailEmpty}>no mistakes recorded</Text>
+                      ) : (
+                        mistakes.map((m, i) => (
+                          <View key={i} style={styles.detailRow}>
+                            <Text style={styles.detailText}>
+                              {m.answer === null ? 'timeout' : `answered ${m.answer}`}
+                            </Text>
+                            <Text style={styles.detailDate}>{m.date}</Text>
+                          </View>
+                        ))
+                      )}
+                    </View>
+                  )}
                   <View style={styles.separator} />
                 </View>
               );
@@ -142,7 +170,13 @@ const styles = StyleSheet.create({
   headerRow:  { backgroundColor: '#EEEEEE' },
   cell:       { fontSize: 17, fontFamily: 'BubblegumSans_400Regular', color: '#212121' },
   headerCell: { fontSize: 15, color: '#757575' },
+  rowExpanded:{ backgroundColor: '#F5F5F5' },
   separator:  { height: 1, backgroundColor: '#E0E0E0' },
+  detailPanel:{ backgroundColor: '#FAFAFA', paddingHorizontal: 24, paddingVertical: 8, borderLeftWidth: 4, borderLeftColor: '#E53935' },
+  detailEmpty:{ fontSize: 14, fontFamily: 'BubblegumSans_400Regular', color: '#9E9E9E', paddingVertical: 4 },
+  detailRow:  { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 },
+  detailText: { fontSize: 15, fontFamily: 'BubblegumSans_400Regular', color: '#E53935' },
+  detailDate: { fontSize: 14, fontFamily: 'BubblegumSans_400Regular', color: '#9E9E9E' },
   footer:     { padding: 20, alignItems: 'center', borderTopWidth: 1, borderTopColor: '#E0E0E0' },
   resetBtn:   { backgroundColor: '#BDBDBD', borderBottomColor: '#757575', borderBottomWidth: 4, borderRadius: 20, paddingHorizontal: 28, paddingVertical: 10, marginBottom: 8 },
   resetBtnText: { color: '#fff', fontSize: 16, fontFamily: 'BubblegumSans_400Regular' },

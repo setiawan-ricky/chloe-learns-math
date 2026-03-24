@@ -13,7 +13,7 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { AUDIO, CELEBRATIONS, pickRandom } from '../src/assets';
-import { getScore, incrementScore, recordQuestionResult, saveHistoryEntry } from '../src/history';
+import { getScore, incrementScore, recordMistake, recordQuestionResult, saveHistoryEntry } from '../src/history';
 import { GAME } from '../src/config';
 import { playRandomSound, unloadAll } from '../src/sound';
 
@@ -145,6 +145,7 @@ export default function GameScreen() {
         stopTimer();
         const q = questionRef.current;
         recordQuestionResult(game, q.num1, q.num2, false);
+        recordMistake(game, q.num1, q.num2, null);
         playRandomSound(AUDIO.timeout);
         setAnswerColor('#F44336');
         trackedTimeout(() => nextQuestionOrEnd(), WRONG_ADVANCE_MS);
@@ -203,6 +204,7 @@ export default function GameScreen() {
               stopTimer();
               const q = questionRef.current;
               recordQuestionResult(game, q.num1, q.num2, false);
+              recordMistake(game, q.num1, q.num2, null);
               playRandomSound(AUDIO.timeout);
               setAnswerColor('#F44336');
               trackedTimeout(() => nextQuestionOrEnd(), WRONG_ADVANCE_MS);
@@ -249,6 +251,7 @@ export default function GameScreen() {
       }, CORRECT_SPLASH_MS);
     } else {
       recordQuestionResult(game, num1, num2, false);
+      recordMistake(game, num1, num2, answer);
       playRandomSound(AUDIO.incorrect);
       setAnswerColor('#F44336');
       if (mode === 'HARD') {
@@ -357,26 +360,26 @@ const styles = StyleSheet.create({
   left:         { flex: 1, padding: 20 },
   leftPortrait: { flex: 1, padding: 16 },
   topRow:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  score:        { fontSize: 22, fontFamily: 'BubblegumSans_400Regular', color: '#3F51B5' },
-  scorePortrait:{ fontSize: 18 },
-  modeLabel:    { fontSize: 18, fontFamily: 'BubblegumSans_400Regular' },
-  modeLabelPortrait: { fontSize: 14 },
-  progress:     { fontSize: 22, fontFamily: 'BubblegumSans_400Regular', color: '#757575' },
-  progressPortrait: { fontSize: 18 },
-  timer:        { fontSize: 38, fontFamily: 'BubblegumSans_400Regular', minWidth: 56, textAlign: 'right' },
-  timerPortrait:{ fontSize: 28, minWidth: 44 },
+  score:        { fontSize: 34, fontFamily: 'BubblegumSans_400Regular', color: '#3F51B5' },
+  scorePortrait:{ fontSize: 24 },
+  modeLabel:    { fontSize: 28, fontFamily: 'BubblegumSans_400Regular' },
+  modeLabelPortrait: { fontSize: 20 },
+  progress:     { fontSize: 34, fontFamily: 'BubblegumSans_400Regular', color: '#757575' },
+  progressPortrait: { fontSize: 24 },
+  timer:        { fontSize: 48, fontFamily: 'BubblegumSans_400Regular', minWidth: 56, textAlign: 'right' },
+  timerPortrait:{ fontSize: 32, minWidth: 44 },
   equationWrap: { flex: 1, justifyContent: 'center' },
   equationWrapPortrait: { flex: 1, justifyContent: 'center' },
   equation:     { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
   equationPortrait: { flex: 0 },
   num:          { fontSize: 80, fontFamily: 'BubblegumSans_400Regular', color: '#212121' },
-  numPortrait:  { fontSize: 48 },
+  numPortrait:  { fontSize: 80 },
   op:           { fontSize: 72, fontFamily: 'BubblegumSans_400Regular', color: '#757575' },
-  opPortrait:   { fontSize: 40 },
+  opPortrait:   { fontSize: 64 },
   equals:       { fontSize: 72, fontFamily: 'BubblegumSans_400Regular', color: '#757575' },
   answer:       { fontSize: 80, fontFamily: 'BubblegumSans_400Regular', minWidth: 100, textAlign: 'center',
                   borderBottomWidth: 3, borderBottomColor: '#BDBDBD' },
-  answerPortrait: { fontSize: 48, minWidth: 60 },
+  answerPortrait: { fontSize: 80, minWidth: 100 },
   keypad:       { width: 280, padding: 12, justifyContent: 'center', gap: 8 },
   keypadPortrait: { width: '100%', flex: 1, padding: 8, paddingBottom: 16, gap: 6, justifyContent: 'flex-end' },
   krow:         { flexDirection: 'row', gap: 8 },
