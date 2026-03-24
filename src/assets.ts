@@ -61,6 +61,11 @@ export const AUDIO = {
     require('../assets/audio/correct/yes-yes-yes-correct.mp3'),
     require('../assets/audio/correct/yes-you-got-it.mp3'),
     require('../assets/audio/correct/you-re-right-chloe.mp3'),
+    require('../assets/audio/correct/you-re-a-superstar-chloe.mp3'),
+    require('../assets/audio/correct/wow-clever-girl.mp3'),
+    require('../assets/audio/correct/that-s-it-well-done.mp3'),
+    require('../assets/audio/correct/woohoo-you-nailed-it.mp3'),
+    require('../assets/audio/correct/you-make-it-look-so-easy.mp3'),
   ],
   incorrect: [
     require('../assets/audio/incorrect/almost-but-not-correct.mp3'),
@@ -70,13 +75,28 @@ export const AUDIO = {
     require('../assets/audio/incorrect/that-doesn-t-seem-right.mp3'),
     require('../assets/audio/incorrect/that-looks-a-little-wrong.mp3'),
     require('../assets/audio/incorrect/think-about-it-again.mp3'),
+    require('../assets/audio/incorrect/oopsie-try-again.mp3'),
+    require('../assets/audio/incorrect/so-close-one-more-try.mp3'),
+    require('../assets/audio/incorrect/that-s-okay-give-it-another-go.mp3'),
+    require('../assets/audio/incorrect/nearly-there-you-ve-got-this.mp3'),
+    require('../assets/audio/incorrect/hmm-not-that-one-try-again.mp3'),
   ],
   allCorrect: [
     require('../assets/audio/all-correct/that-was-too-easy-for-chloe-you-got-everything-right-great-work.mp3'),
     require('../assets/audio/all-correct/yay-good-job-chloe-everything-was-correct.mp3'),
+    require('../assets/audio/all-correct/wow-chloe-perfect-score-you-re-a-genius.mp3'),
+    require('../assets/audio/all-correct/not-a-single-mistake-incredible.mp3'),
+    require('../assets/audio/all-correct/every-single-one-correct-chloe-you-re-amazing.mp3'),
+    require('../assets/audio/all-correct/you-got-them-all-right-super-proud-of-you.mp3'),
+    require('../assets/audio/all-correct/a-perfect-round-nothing-can-stop-you.mp3'),
   ],
   completion: [
     require('../assets/audio/completion/great-work-let-s-try-get-everything-right-next-time.mp3'),
+    require('../assets/audio/completion/good-try-chloe-keep-practising.mp3'),
+    require('../assets/audio/completion/well-done-for-finishing-you-did-great.mp3'),
+    require('../assets/audio/completion/nice-effort-let-s-see-if-you-can-do-even-better.mp3'),
+    require('../assets/audio/completion/that-was-a-good-round-chloe.mp3'),
+    require('../assets/audio/completion/keep-going-you-re-getting-better-every-time.mp3'),
   ],
   completionBad: [
     require('../assets/audio/completion-bad/hmm-that-wasn-t-so-good-this-time-let-s-try-again.mp3'),
@@ -85,6 +105,11 @@ export const AUDIO = {
   timeout: [
     require('../assets/audio/timeout/come-on-slow-coach.mp3'),
     require('../assets/audio/timeout/you-have-to-be-faster.mp3'),
+    require('../assets/audio/timeout/oh-no-time-s-up.mp3'),
+    require('../assets/audio/timeout/too-slow-be-quicker-next-time.mp3'),
+    require('../assets/audio/timeout/the-clock-ran-out-try-to-be-faster.mp3'),
+    require('../assets/audio/timeout/hurry-up-next-time-chloe.mp3'),
+    require('../assets/audio/timeout/tick-tock-you-ran-out-of-time.mp3'),
   ],
 };
 
