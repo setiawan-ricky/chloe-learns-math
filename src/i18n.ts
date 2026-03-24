@@ -56,6 +56,7 @@ const T = {
     goodJob: (c: number, t: number) => `good job!\n${c} out of ${t} correct`,
     answered: (a: number) => `answered ${a}`,
     timeout: 'timeout',
+    gamesToday: 'times played today',
   },
   zh: {
     title: '紫怡学数学',
@@ -92,6 +93,7 @@ const T = {
     goodJob: (c: number, t: number) => `做得好紫怡！\n${t}题对了${c}题`,
     answered: (a: number) => `回答了 ${a}`,
     timeout: '超时',
+    gamesToday: '今天玩的次数',
   },
 };
 

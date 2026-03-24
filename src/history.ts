@@ -141,6 +141,23 @@ export async function saveHistoryEntry(entry: Omit<HistoryEntry, 'date'>): Promi
   } catch {}
 }
 
+export async function getGamesToday(): Promise<number> {
+  try {
+    const raw = await AsyncStorage.getItem(HISTORY.STORAGE_KEY);
+    if (!raw) return 0;
+    const entries: HistoryEntry[] = JSON.parse(raw);
+    if (!Array.isArray(entries)) return 0;
+    // Match using the same en-GB format that saveHistoryEntry uses
+    const todayStr = new Date().toLocaleDateString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric',
+    });
+    return entries.filter(e => {
+      const datePart = e.date?.replace(/[,\s]+\d{1,2}:\d{2}$/, '').replace(/,$/, '');
+      return datePart === todayStr;
+    }).length;
+  } catch { return 0; }
+}
+
 export async function loadHistory(): Promise<HistoryEntry[]> {
   try {
     const raw = await AsyncStorage.getItem(HISTORY.STORAGE_KEY);

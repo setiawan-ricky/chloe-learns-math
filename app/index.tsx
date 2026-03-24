@@ -10,15 +10,17 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { CHARACTERS, EXPLOSION, getAudio, LASER } from '../src/assets';
 import { useLang, t } from '../src/i18n';
+import { getGamesToday } from '../src/history';
 
-const BTN_GREEN = require('../assets/images/library/btn-green.png');
-const BTN_RED   = require('../assets/images/library/btn-red.png');
-const BTN_BLUE  = require('../assets/images/library/btn-blue.png');
+const BTN_GREEN  = require('../assets/images/library/btn-green.png');
+const BTN_RED    = require('../assets/images/library/btn-red.png');
+const BTN_BLUE   = require('../assets/images/library/btn-blue.png');
+const BTN_ORANGE = require('../assets/images/library/btn-orange.png');
 const ICON_HEART = require('../assets/images/library/heart.png');
-const ICON_UNICORN = require('../assets/images/library/unicorn.png');
+const ICON_BLACKBOARD = require('../assets/images/library/blackboard.png');
 const FLAG_US = require('../assets/images/library/flag-us.png');
 const FLAG_CN = require('../assets/images/library/flag-cn.png');
 import { BOUNCE } from '../src/config';
@@ -27,7 +29,7 @@ import { playSound, unloadAll } from '../src/sound';
 const { IMG_SIZE, SPEED_MIN, SPEED_RANGE, SPEED_MULTIPLIER, MIN_COMPONENT_SPEED,
         EXPLOSION_DISPLAY_MS, EXPLOSION_FADE_MS } = BOUNCE;
 
-const BOUNCER_COUNT = 2;
+const BOUNCER_COUNT = 3;
 
 interface PhysicsState {
   x: number;
@@ -66,6 +68,9 @@ export default function HomeScreen() {
   const { lang, setLang } = useLang();
   const s = t(lang);
   const audio = getAudio(lang);
+
+  const [gamesToday, setGamesToday] = useState(0);
+  useFocusEffect(useCallback(() => { getGamesToday().then(setGamesToday); }, []));
 
   const zoneSizeRef = useRef({ width: 0, height: 0 });
   const physicsRef = useRef<PhysicsState[]>(makeInitialPhysics(BOUNCER_COUNT));
@@ -222,7 +227,7 @@ export default function HomeScreen() {
           <Image source={ICON_HEART} style={styles.titleIcon} resizeMode="contain" />
           <Text style={styles.titlePink}>{s.titleChloe}</Text>
           <Text style={styles.titlePurple}>{s.titleRest}</Text>
-          <Image source={ICON_UNICORN} style={styles.titleIcon} resizeMode="contain" />
+          <Image source={ICON_BLACKBOARD} style={styles.titleIcon} resizeMode="contain" />
         </TouchableOpacity>
         <View style={styles.flagRow}>
           <TouchableOpacity onPress={() => setLang('en')} activeOpacity={0.7} style={[styles.flagBtn, lang === 'en' && styles.flagActive]}>
@@ -263,7 +268,10 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.divider} />
+        <TouchableOpacity activeOpacity={0.7} style={styles.todayCol} onPress={() => playSound(audio.menu.gamesToday)}>
+          <Text style={styles.todayCount}>{gamesToday}</Text>
+          <Text style={styles.todayLabel}>{s.gamesToday}</Text>
+        </TouchableOpacity>
 
         <View style={styles.col}>
           <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(audio.menu.minus)}>
@@ -286,7 +294,7 @@ export default function HomeScreen() {
 
       <View style={styles.bottomRow}>
         <TouchableOpacity activeOpacity={0.8} style={styles.bottomBtn} onPress={() => router.push('/history')}>
-          <ImageBackground source={BTN_BLUE} style={styles.btnBgBottom} resizeMode="contain">
+          <ImageBackground source={BTN_ORANGE} style={styles.btnBgBottom} resizeMode="contain">
             <Text style={styles.bottomBtnText}>{s.history}</Text>
           </ImageBackground>
         </TouchableOpacity>
@@ -316,12 +324,15 @@ const styles = StyleSheet.create({
   imgSize:       { width: IMG_SIZE, height: IMG_SIZE },
   buttonRow:     { flexDirection: 'row', paddingHorizontal: 24, paddingBottom: 16 },
   col:           { flex: 1, alignItems: 'center' },
+  todayCol:      { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8 },
+  todayCount:    { fontSize: 48, fontFamily: 'BubblegumSans_400Regular', color: '#3F51B5' },
+  todayLabel:    { fontSize: 12, fontFamily: 'BubblegumSans_400Regular', color: '#9E9E9E', textAlign: 'center' },
   colLabel:      { fontSize: 30, fontFamily: 'BubblegumSans_400Regular', color: '#9E9E9E', letterSpacing: 1.5, marginBottom: 10 },
   gameBtn:       { width: '100%', alignItems: 'center', marginBottom: 4 },
   btnBg:         { width: '100%', height: 90, justifyContent: 'center', alignItems: 'center' },
   gameBtnText:   { color: '#fff', fontSize: 26, fontFamily: 'BubblegumSans_400Regular',
                    textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 3 },
-  divider:       { width: 1, backgroundColor: '#E0E0E0', marginHorizontal: 12 },
+
   bottomRow:     { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 20 },
   bottomBtn:     {},
   btnBgBottom:   { width: 160, height: 80, justifyContent: 'center', alignItems: 'center' },

@@ -53,6 +53,7 @@ const AUDIO_EN = {
     hard: require('../assets/audio/en/menu/hard.mp3'),
     addition: require('../assets/audio/en/menu/addition.mp3'),
     minus: require('../assets/audio/en/menu/minus.mp3'),
+    gamesToday: require('../assets/audio/en/menu/games-today.mp3'),
   },
   correct: [
     require('../assets/audio/en/correct/absolutely-right.mp3'),
@@ -124,6 +125,7 @@ const AUDIO_ZH = {
     hard: require('../assets/audio/zh/menu/hard.mp3'),
     addition: require('../assets/audio/zh/menu/addition.mp3'),
     minus: require('../assets/audio/zh/menu/minus.mp3'),
+    gamesToday: require('../assets/audio/zh/menu/games-today.mp3'),
   },
   correct: [
     require('../assets/audio/zh/correct/da-dui-le.mp3'),
