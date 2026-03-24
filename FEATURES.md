@@ -4,10 +4,21 @@ Canonical feature list for Chloe Learns Math.
 Keep this in sync with the legacy Android project (`chloe-learns-math-legacy/FEATURES.md`).
 Changes are always made here first, then ported to legacy.
 
+## Bilingual Support (i18n)
+
+- [x] Language toggle: USA and China flag icons on home screen
+- [x] Language preference persisted in AsyncStorage / SharedPreferences
+- [x] All UI text translated: English and Chinese (Mandarin)
+- [x] Chloe's Chinese name: 紫怡
+- [x] Audio: 54 English clips (Ana voice) + 54 Chinese clips (Xiaoxiao voice)
+- [x] Language-aware audio loading via getAudio(lang)
+- [x] All screens (home, game, history, stats) use i18n strings
+
 ## Home Screen
 
 - [x] Title with heart icon before "chloe" (light pink) and unicorn icon after "learns math" (light purple)
-- [x] Title plays `chloe-learns-math.mp3` on tap
+- [x] Title plays `chloe-learns-math.mp3` on tap (language-aware)
+- [x] Flag selector: USA (English) / China (Chinese) with active state highlight
 - [x] Bubblegum Sans font applied throughout all screens
 - [x] All text lowercase throughout the app
 - [x] Blob-shaped image buttons (green=easy, red=hard, blue=history/stats)
@@ -17,8 +28,8 @@ Changes are always made here first, then ported to legacy.
 - [x] Explosion image: asymmetric jagged burst (not a star)
 - [x] Bouncing speed: base (3.5 + rand*2.5) * 1.5 * 0.75
 - [x] Game selection: Addition (Easy/Hard), Minus (Easy/Hard)
-- [x] "ADDITION" / "MINUS" labels play corresponding audio on tap
-- [x] Easy/Hard buttons play corresponding audio on tap
+- [x] "ADDITION" / "MINUS" labels play corresponding audio on tap (language-aware)
+- [x] Easy/Hard buttons play corresponding audio on tap (language-aware)
 - [x] History button
 
 ## Math Game
@@ -65,18 +76,24 @@ Changes are always made here first, then ported to legacy.
 
 ## Audio Assets
 
-- [x] correct/ (11 clips)
-- [x] incorrect/ (7 clips)
-- [x] all-correct/ (2 clips)
-- [x] completion/ (1 clip)
+Per language (en/ and zh/ directories, 54 clips each):
+- [x] correct/ (15 clips)
+- [x] incorrect/ (12 clips)
+- [x] all-correct/ (7 clips)
+- [x] completion/ (6 clips)
 - [x] completion-bad/ (2 clips)
-- [x] timeout/ (2 clips)
-- [x] laser.mp3
-- [x] chloe-learns-math.mp3
+- [x] timeout/ (7 clips)
 - [x] menu/ (4 clips: easy, hard, addition, minus)
+- [x] chloe-learns-math.mp3
+
+Language-independent:
+- [x] laser.mp3
+
+Voices: Ana (en-US, English), Xiaoxiao (zh-CN, Chinese)
 
 ## Image Assets
 
-- [x] characters/ (13 PNGs: car, dolphin, elephant, giraffe, heart, magic_wand, mermaid, princess, rainbow, smiley, snowflake, star, unicorn)
+- [x] characters/ (17 PNGs: car, dolphin, elephant, giraffe, heart, magic_wand, mermaid, princess, rainbow, snowflake, star, unicorn, penguin, panda, kitten, bunny, owl)
 - [x] celebration/ (16 PNGs)
 - [x] explosion.png (asymmetric jagged burst)
+- [x] menu/ (btn-green, btn-red, btn-blue, heart, unicorn, flag-us, flag-cn)

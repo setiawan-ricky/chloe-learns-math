@@ -11,13 +11,16 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { CHARACTERS, EXPLOSION, LASER, MENU_AUDIO, TITLE_AUDIO } from '../src/assets';
+import { CHARACTERS, EXPLOSION, getAudio, LASER } from '../src/assets';
+import { useLang, t } from '../src/i18n';
 
 const BTN_GREEN = require('../assets/images/library/btn-green.png');
 const BTN_RED   = require('../assets/images/library/btn-red.png');
 const BTN_BLUE  = require('../assets/images/library/btn-blue.png');
 const ICON_HEART = require('../assets/images/library/heart.png');
 const ICON_UNICORN = require('../assets/images/library/unicorn.png');
+const FLAG_US = require('../assets/images/library/flag-us.png');
+const FLAG_CN = require('../assets/images/library/flag-cn.png');
 import { BOUNCE } from '../src/config';
 import { playSound, unloadAll } from '../src/sound';
 
@@ -60,6 +63,9 @@ function makeInitialPhysics(count: number): PhysicsState[] {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { lang, setLang } = useLang();
+  const s = t(lang);
+  const audio = getAudio(lang);
 
   const zoneSizeRef = useRef({ width: 0, height: 0 });
   const physicsRef = useRef<PhysicsState[]>(makeInitialPhysics(BOUNCER_COUNT));
@@ -211,12 +217,22 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(TITLE_AUDIO)} style={styles.titleRow}>
-        <Image source={ICON_HEART} style={styles.titleIcon} resizeMode="contain" />
-        <Text style={styles.titlePink}>chloe </Text>
-        <Text style={styles.titlePurple}>learns math</Text>
-        <Image source={ICON_UNICORN} style={styles.titleIcon} resizeMode="contain" />
-      </TouchableOpacity>
+      <View style={styles.topBar}>
+        <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(audio.title)} style={styles.titleRow}>
+          <Image source={ICON_HEART} style={styles.titleIcon} resizeMode="contain" />
+          <Text style={styles.titlePink}>{s.titleChloe}</Text>
+          <Text style={styles.titlePurple}>{s.titleRest}</Text>
+          <Image source={ICON_UNICORN} style={styles.titleIcon} resizeMode="contain" />
+        </TouchableOpacity>
+        <View style={styles.flagRow}>
+          <TouchableOpacity onPress={() => setLang('en')} activeOpacity={0.7} style={[styles.flagBtn, lang === 'en' && styles.flagActive]}>
+            <Image source={FLAG_US} style={styles.flagImg} resizeMode="contain" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setLang('zh')} activeOpacity={0.7} style={[styles.flagBtn, lang === 'zh' && styles.flagActive]}>
+            <Image source={FLAG_CN} style={styles.flagImg} resizeMode="contain" />
+          </TouchableOpacity>
+        </View>
+      </View>
 
       <View style={styles.bounceZone} onLayout={onZoneLayout} pointerEvents="box-none">
         {animRefs.map((anim, i) => (
@@ -230,19 +246,19 @@ export default function HomeScreen() {
 
       <View style={styles.buttonRow}>
         <View style={styles.col}>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(MENU_AUDIO.addition)}>
-            <Text style={styles.colLabel}>addition</Text>
+          <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(audio.menu.addition)}>
+            <Text style={styles.colLabel}>{s.addition}</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
-            onPress={() => { playSound(MENU_AUDIO.easy); router.push({ pathname: '/game', params: { game: 'Addition', mode: 'EASY' } }); }}>
+            onPress={() => { playSound(audio.menu.easy); router.push({ pathname: '/game', params: { game: 'Addition', mode: 'EASY' } }); }}>
             <ImageBackground source={BTN_GREEN} style={styles.btnBg} resizeMode="contain">
-              <Text style={styles.gameBtnText}>easy</Text>
+              <Text style={styles.gameBtnText}>{s.easy}</Text>
             </ImageBackground>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
-            onPress={() => { playSound(MENU_AUDIO.hard); router.push({ pathname: '/game', params: { game: 'Addition', mode: 'HARD' } }); }}>
+            onPress={() => { playSound(audio.menu.hard); router.push({ pathname: '/game', params: { game: 'Addition', mode: 'HARD' } }); }}>
             <ImageBackground source={BTN_RED} style={styles.btnBg} resizeMode="contain">
-              <Text style={styles.gameBtnText}>hard</Text>
+              <Text style={styles.gameBtnText}>{s.hard}</Text>
             </ImageBackground>
           </TouchableOpacity>
         </View>
@@ -250,19 +266,19 @@ export default function HomeScreen() {
         <View style={styles.divider} />
 
         <View style={styles.col}>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(MENU_AUDIO.minus)}>
-            <Text style={styles.colLabel}>minus</Text>
+          <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(audio.menu.minus)}>
+            <Text style={styles.colLabel}>{s.minus}</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
-            onPress={() => { playSound(MENU_AUDIO.easy); router.push({ pathname: '/game', params: { game: 'Minus', mode: 'EASY' } }); }}>
+            onPress={() => { playSound(audio.menu.easy); router.push({ pathname: '/game', params: { game: 'Minus', mode: 'EASY' } }); }}>
             <ImageBackground source={BTN_GREEN} style={styles.btnBg} resizeMode="contain">
-              <Text style={styles.gameBtnText}>easy</Text>
+              <Text style={styles.gameBtnText}>{s.easy}</Text>
             </ImageBackground>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
-            onPress={() => { playSound(MENU_AUDIO.hard); router.push({ pathname: '/game', params: { game: 'Minus', mode: 'HARD' } }); }}>
+            onPress={() => { playSound(audio.menu.hard); router.push({ pathname: '/game', params: { game: 'Minus', mode: 'HARD' } }); }}>
             <ImageBackground source={BTN_RED} style={styles.btnBg} resizeMode="contain">
-              <Text style={styles.gameBtnText}>hard</Text>
+              <Text style={styles.gameBtnText}>{s.hard}</Text>
             </ImageBackground>
           </TouchableOpacity>
         </View>
@@ -271,12 +287,12 @@ export default function HomeScreen() {
       <View style={styles.bottomRow}>
         <TouchableOpacity activeOpacity={0.8} style={styles.bottomBtn} onPress={() => router.push('/history')}>
           <ImageBackground source={BTN_BLUE} style={styles.btnBgBottom} resizeMode="contain">
-            <Text style={styles.bottomBtnText}>history</Text>
+            <Text style={styles.bottomBtnText}>{s.history}</Text>
           </ImageBackground>
         </TouchableOpacity>
         <TouchableOpacity activeOpacity={0.8} style={styles.bottomBtn} onPress={() => router.push('/stats')}>
           <ImageBackground source={BTN_BLUE} style={styles.btnBgBottom} resizeMode="contain">
-            <Text style={styles.bottomBtnText}>stats</Text>
+            <Text style={styles.bottomBtnText}>{s.stats}</Text>
           </ImageBackground>
         </TouchableOpacity>
       </View>
@@ -286,7 +302,12 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container:     { flex: 1, backgroundColor: '#FAFAFA' },
-  titleRow:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: 24, paddingBottom: 12, gap: 6 },
+  topBar:        { alignItems: 'center', paddingTop: 16 },
+  titleRow:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: 8, paddingBottom: 4, gap: 6 },
+  flagRow:       { flexDirection: 'row', gap: 12, paddingBottom: 8 },
+  flagBtn:       { opacity: 0.4, padding: 4 },
+  flagActive:    { opacity: 1 },
+  flagImg:       { width: 36, height: 24 },
   titleIcon:     { width: 40, height: 40 },
   titlePink:     { fontSize: 38, fontFamily: 'BubblegumSans_400Regular', color: '#F48FB1' },
   titlePurple:   { fontSize: 38, fontFamily: 'BubblegumSans_400Regular', color: '#B39DDB' },

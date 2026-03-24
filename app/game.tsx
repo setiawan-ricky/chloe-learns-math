@@ -12,10 +12,11 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import { AUDIO, CELEBRATIONS, pickRandom } from '../src/assets';
+import { CELEBRATIONS, getAudio, pickRandom } from '../src/assets';
 import { getScore, incrementScore, recordMistake, recordQuestionResult, saveHistoryEntry } from '../src/history';
 import { GAME } from '../src/config';
 import { playRandomSound, unloadAll } from '../src/sound';
+import { useLang, t } from '../src/i18n';
 
 type GameType = 'Addition' | 'Minus';
 type ModeType = 'EASY' | 'HARD';
@@ -38,6 +39,9 @@ function randomQuestion(game: GameType): { num1: number; num2: number } {
 
 export default function GameScreen() {
   const router = useRouter();
+  const { lang } = useLang();
+  const s = t(lang);
+  const AUDIO = getAudio(lang);
   const { game: gameParam, mode: modeParam } = useLocalSearchParams<{ game: string; mode: string }>();
   const game  = (gameParam  ?? 'Addition') as GameType;
   const mode  = (modeParam  ?? 'EASY')     as ModeType;
@@ -102,15 +106,15 @@ export default function GameScreen() {
     if (correct === ROUND_SIZE) {
       playRandomSound(AUDIO.allCorrect);
       setCelebration(pickRandom(CELEBRATIONS));
-      setEndMessage(`amazing!\nperfect score! 🎉`);
+      setEndMessage(s.amazing);
     } else if (correct <= 1) {
       playRandomSound(AUDIO.completionBad);
       setCelebration(null);
-      setEndMessage(`keep practising!\n${correct} out of ${ROUND_SIZE} correct`);
+      setEndMessage(s.keepPractising(correct, ROUND_SIZE));
     } else {
       playRandomSound(AUDIO.completion);
       setCelebration(null);
-      setEndMessage(`good job!\n${correct} out of ${ROUND_SIZE} correct`);
+      setEndMessage(s.goodJob(correct, ROUND_SIZE));
     }
   }, [game, mode, stopTimer]);
 
@@ -293,8 +297,8 @@ export default function GameScreen() {
     <View style={[styles.root, isPortrait && styles.rootPortrait]}>
       <View style={[styles.left, isPortrait && styles.leftPortrait]}>
         <View style={styles.topRow}>
-          <Text style={[styles.score, isPortrait && styles.scorePortrait]}>score: {score}</Text>
-          <Text style={[styles.modeLabel, { color: modeColor }, isPortrait && styles.modeLabelPortrait]}>{game.toLowerCase()} • {mode.toLowerCase()}</Text>
+          <Text style={[styles.score, isPortrait && styles.scorePortrait]}>{s.score}: {score}</Text>
+          <Text style={[styles.modeLabel, { color: modeColor }, isPortrait && styles.modeLabelPortrait]}>{game === 'Addition' ? s.addition : s.minus} • {mode === 'EASY' ? s.easy : s.hard}</Text>
           <Text style={[styles.progress, isPortrait && styles.progressPortrait]}>{questionIdx + 1} / {ROUND_SIZE}</Text>
           <Text style={[styles.timer, { color: timerColor }, isPortrait && styles.timerPortrait]}>{timeLeft}</Text>
         </View>
@@ -327,7 +331,7 @@ export default function GameScreen() {
             <Text style={styles.knum}>⌫</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.kbtn, styles.kenter, isPortrait && styles.kbtnPortrait]} onPress={onEnter}>
-            <Text style={[styles.knum, styles.kenterText]}>ok</Text>
+            <Text style={[styles.knum, styles.kenterText]}>{s.ok}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -343,10 +347,10 @@ export default function GameScreen() {
           {celebration && <Image source={celebration} style={styles.celebImg} resizeMode="contain" />}
           <Text style={styles.endMsg}>{endMessage}</Text>
           <TouchableOpacity style={styles.playAgainBtn} onPress={startRound}>
-            <Text style={styles.playAgainText}>play again</Text>
+            <Text style={styles.playAgainText}>{s.playAgain}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.quitBtn} onPress={() => router.back()}>
-            <Text style={styles.quitText}>quit</Text>
+            <Text style={styles.quitText}>{s.quit}</Text>
           </TouchableOpacity>
         </View>
       )}

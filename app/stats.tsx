@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { loadMistakes, loadQuestionStats, MistakeEntry, QuestionStat, resetAllData } from '../src/history';
+import { useLang, t } from '../src/i18n';
 
 type SortKey = 'question' | 'accuracy' | 'attempts';
 type SortDir = 'asc' | 'desc';
@@ -25,6 +26,8 @@ export default function StatsScreen() {
   const [stats, setStats] = useState<QuestionStat[]>([]);
   const [sortKey, setSortKey] = useState<SortKey>('accuracy');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
+  const { lang } = useLang();
+  const str = t(lang);
   const [resetCount, setResetCount] = useState(0);
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [mistakes, setMistakes] = useState<MistakeEntry[]>([]);
@@ -68,7 +71,7 @@ export default function StatsScreen() {
     const next = resetCount + 1;
     if (next >= RESET_TAPS) {
       if (Platform.OS === 'web') {
-        if (confirm('reset all scores and history?')) {
+        if (confirm(str.resetConfirm)) {
           await resetAllData();
           setStats([]);
           setResetCount(0);
@@ -76,9 +79,9 @@ export default function StatsScreen() {
           setResetCount(0);
         }
       } else {
-        Alert.alert('reset all data', 'reset all scores and history?', [
-          { text: 'cancel', onPress: () => setResetCount(0) },
-          { text: 'reset', style: 'destructive', onPress: async () => {
+        Alert.alert(str.resetTitle, str.resetConfirm, [
+          { text: str.cancel, onPress: () => setResetCount(0) },
+          { text: str.reset, style: 'destructive', onPress: async () => {
             await resetAllData();
             setStats([]);
             setResetCount(0);
@@ -94,24 +97,24 @@ export default function StatsScreen() {
     <View style={styles.root}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.back}>← stats</Text>
+          <Text style={styles.back}>← {str.stats}</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView>
         {sorted.length === 0 ? (
-          <Text style={styles.empty}>no questions answered yet!</Text>
+          <Text style={styles.empty}>{str.noQuestionsYet}</Text>
         ) : (
           <>
             <View style={[styles.row, styles.headerRow]}>
               <TouchableOpacity style={{ flex: 3 }} onPress={() => toggleSort('question')}>
-                <Text style={[styles.cell, styles.headerCell]}>question{arrow('question')}</Text>
+                <Text style={[styles.cell, styles.headerCell]}>{str.question}{arrow('question')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={{ flex: 1 }} onPress={() => toggleSort('accuracy')}>
-                <Text style={[styles.cell, styles.headerCell, { textAlign: 'center' }]}>accuracy{arrow('accuracy')}</Text>
+                <Text style={[styles.cell, styles.headerCell, { textAlign: 'center' }]}>{str.accuracy}{arrow('accuracy')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={{ flex: 1 }} onPress={() => toggleSort('attempts')}>
-                <Text style={[styles.cell, styles.headerCell, { textAlign: 'center' }]}>tries{arrow('attempts')}</Text>
+                <Text style={[styles.cell, styles.headerCell, { textAlign: 'center' }]}>{str.tries}{arrow('attempts')}</Text>
               </TouchableOpacity>
             </View>
 
@@ -130,12 +133,12 @@ export default function StatsScreen() {
                   {isExpanded && (
                     <View style={styles.detailPanel}>
                       {mistakes.length === 0 ? (
-                        <Text style={styles.detailEmpty}>no mistakes recorded</Text>
+                        <Text style={styles.detailEmpty}>{str.noMistakes}</Text>
                       ) : (
                         mistakes.map((m, i) => (
                           <View key={i} style={styles.detailRow}>
                             <Text style={styles.detailText}>
-                              {m.answer === null ? 'timeout' : `answered ${m.answer}`}
+                              {m.answer === null ? str.timeout : str.answered(m.answer)}
                             </Text>
                             <Text style={styles.detailDate}>{m.date}</Text>
                           </View>
@@ -153,9 +156,9 @@ export default function StatsScreen() {
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.resetBtn} onPress={onResetTap} activeOpacity={0.7}>
-          <Text style={styles.resetBtnText}>reset</Text>
+          <Text style={styles.resetBtnText}>{str.reset}</Text>
         </TouchableOpacity>
-        <Text style={styles.resetHint}>tap {RESET_TAPS} times to reset all scores and history{resetCount > 0 ? ` (${resetCount}/${RESET_TAPS})` : ''}</Text>
+        <Text style={styles.resetHint}>{str.resetHint(RESET_TAPS, resetCount)}</Text>
       </View>
     </View>
   );
