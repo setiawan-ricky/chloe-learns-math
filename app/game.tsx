@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  AppState,
   Image,
   ImageSourcePropType,
   Platform,
@@ -101,15 +102,15 @@ export default function GameScreen() {
     if (correct === ROUND_SIZE) {
       playRandomSound(AUDIO.allCorrect);
       setCelebration(pickRandom(CELEBRATIONS));
-      setEndMessage(`Amazing!\nPerfect score! 🎉`);
+      setEndMessage(`amazing!\nperfect score! 🎉`);
     } else if (correct <= 1) {
       playRandomSound(AUDIO.completionBad);
       setCelebration(null);
-      setEndMessage(`Keep practising!\n${correct} out of ${ROUND_SIZE} correct`);
+      setEndMessage(`keep practising!\n${correct} out of ${ROUND_SIZE} correct`);
     } else {
       playRandomSound(AUDIO.completion);
       setCelebration(null);
-      setEndMessage(`Good job!\n${correct} out of ${ROUND_SIZE} correct`);
+      setEndMessage(`good job!\n${correct} out of ${ROUND_SIZE} correct`);
     }
   }, [game, mode, stopTimer]);
 
@@ -167,6 +168,47 @@ export default function GameScreen() {
     setCelebration(null);
     startTimer();
   }, [game, startTimer, stopTimer]);
+
+  const pausedTimeLeftRef = useRef<number | null>(null);
+  const pausedTimeoutsRef = useRef<{ fn: () => void; remaining: number; started: number }[]>([]);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (!mountedRef.current) return;
+      if (state === 'background' || state === 'inactive') {
+        if (phaseRef.current === 'playing' && timerRef.current) {
+          pausedTimeLeftRef.current = timeLeftRef.current;
+          stopTimer();
+        }
+        const saved: typeof pausedTimeoutsRef.current = [];
+        for (const id of timeoutsRef.current) {
+          clearTimeout(id);
+        }
+        timeoutsRef.current.clear();
+        pausedTimeoutsRef.current = saved;
+      } else if (state === 'active') {
+        if (phaseRef.current === 'playing' && pausedTimeLeftRef.current !== null) {
+          timeLeftRef.current = pausedTimeLeftRef.current;
+          setTimeLeft(pausedTimeLeftRef.current);
+          pausedTimeLeftRef.current = null;
+
+          timerRef.current = setInterval(() => {
+            const next = timeLeftRef.current - 1;
+            timeLeftRef.current = next;
+            setTimeLeft(next);
+            setTimerColor(next <= warnAt ? '#F44336' : '#757575');
+            if (next <= 0) {
+              stopTimer();
+              playRandomSound(AUDIO.timeout);
+              setAnswerColor('#F44336');
+              trackedTimeout(() => nextQuestionOrEnd(), WRONG_ADVANCE_MS);
+            }
+          }, 1000);
+        }
+      }
+    });
+    return () => sub.remove();
+  }, [stopTimer, warnAt, trackedTimeout, nextQuestionOrEnd]);
 
   useEffect(() => {
     startRound();
@@ -242,17 +284,19 @@ export default function GameScreen() {
     <View style={[styles.root, isPortrait && styles.rootPortrait]}>
       <View style={[styles.left, isPortrait && styles.leftPortrait]}>
         <View style={styles.topRow}>
-          <Text style={[styles.score, isPortrait && styles.scorePortrait]}>Score: {score}</Text>
-          <Text style={[styles.modeLabel, { color: modeColor }, isPortrait && styles.modeLabelPortrait]}>{game} • {mode}</Text>
+          <Text style={[styles.score, isPortrait && styles.scorePortrait]}>score: {score}</Text>
+          <Text style={[styles.modeLabel, { color: modeColor }, isPortrait && styles.modeLabelPortrait]}>{game.toLowerCase()} • {mode.toLowerCase()}</Text>
           <Text style={[styles.progress, isPortrait && styles.progressPortrait]}>{questionIdx + 1} / {ROUND_SIZE}</Text>
           <Text style={[styles.timer, { color: timerColor }, isPortrait && styles.timerPortrait]}>{timeLeft}</Text>
         </View>
-        <View style={styles.equation}>
-          <Text style={[styles.num, isPortrait && styles.numPortrait]}>{question.num1}</Text>
-          <Text style={[styles.op, isPortrait && styles.opPortrait]}>{operator}</Text>
-          <Text style={[styles.num, isPortrait && styles.numPortrait]}>{question.num2}</Text>
-          <Text style={[styles.equals, isPortrait && styles.opPortrait]}>=</Text>
-          <Text style={[styles.answer, { color: answerColor }, isPortrait && styles.answerPortrait]}>{input || '?'}</Text>
+        <View style={[styles.equationWrap, isPortrait && styles.equationWrapPortrait]}>
+          <View style={[styles.equation, isPortrait && styles.equationPortrait]}>
+            <Text style={[styles.num, isPortrait && styles.numPortrait]}>{question.num1}</Text>
+            <Text style={[styles.op, isPortrait && styles.opPortrait]}>{operator}</Text>
+            <Text style={[styles.num, isPortrait && styles.numPortrait]}>{question.num2}</Text>
+            <Text style={[styles.equals, isPortrait && styles.opPortrait]}>=</Text>
+            <Text style={[styles.answer, { color: answerColor }, isPortrait && styles.answerPortrait]}>{input || '?'}</Text>
+          </View>
         </View>
       </View>
 
@@ -274,7 +318,7 @@ export default function GameScreen() {
             <Text style={styles.knum}>⌫</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.kbtn, styles.kenter, isPortrait && styles.kbtnPortrait]} onPress={onEnter}>
-            <Text style={[styles.knum, styles.kenterText]}>OK</Text>
+            <Text style={[styles.knum, styles.kenterText]}>ok</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -290,10 +334,10 @@ export default function GameScreen() {
           {celebration && <Image source={celebration} style={styles.celebImg} resizeMode="contain" />}
           <Text style={styles.endMsg}>{endMessage}</Text>
           <TouchableOpacity style={styles.playAgainBtn} onPress={startRound}>
-            <Text style={styles.playAgainText}>Play Again</Text>
+            <Text style={styles.playAgainText}>play again</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.quitBtn} onPress={() => router.back()}>
-            <Text style={styles.quitText}>Quit</Text>
+            <Text style={styles.quitText}>quit</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -305,34 +349,37 @@ const styles = StyleSheet.create({
   root:         { flex: 1, flexDirection: 'row', backgroundColor: '#FAFAFA' },
   rootPortrait: { flexDirection: 'column' },
   left:         { flex: 1, padding: 20 },
-  leftPortrait: { flex: 1, padding: 16, justifyContent: 'center' },
+  leftPortrait: { flex: 1, padding: 16 },
   topRow:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  score:        { fontSize: 22, fontWeight: 'bold', color: '#3F51B5' },
+  score:        { fontSize: 22, fontFamily: 'BubblegumSans_400Regular', color: '#3F51B5' },
   scorePortrait:{ fontSize: 18 },
-  modeLabel:    { fontSize: 18, fontWeight: 'bold' },
+  modeLabel:    { fontSize: 18, fontFamily: 'BubblegumSans_400Regular' },
   modeLabelPortrait: { fontSize: 14 },
-  progress:     { fontSize: 22, color: '#757575' },
+  progress:     { fontSize: 22, fontFamily: 'BubblegumSans_400Regular', color: '#757575' },
   progressPortrait: { fontSize: 18 },
-  timer:        { fontSize: 38, fontWeight: 'bold', minWidth: 56, textAlign: 'right' },
+  timer:        { fontSize: 38, fontFamily: 'BubblegumSans_400Regular', minWidth: 56, textAlign: 'right' },
   timerPortrait:{ fontSize: 28, minWidth: 44 },
+  equationWrap: { flex: 1, justifyContent: 'center' },
+  equationWrapPortrait: { flex: 1, justifyContent: 'center' },
   equation:     { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
-  num:          { fontSize: 80, fontWeight: 'bold', color: '#212121' },
+  equationPortrait: { flex: 0 },
+  num:          { fontSize: 80, fontFamily: 'BubblegumSans_400Regular', color: '#212121' },
   numPortrait:  { fontSize: 48 },
-  op:           { fontSize: 72, color: '#757575' },
+  op:           { fontSize: 72, fontFamily: 'BubblegumSans_400Regular', color: '#757575' },
   opPortrait:   { fontSize: 40 },
-  equals:       { fontSize: 72, color: '#757575' },
-  answer:       { fontSize: 80, fontWeight: 'bold', minWidth: 100, textAlign: 'center',
+  equals:       { fontSize: 72, fontFamily: 'BubblegumSans_400Regular', color: '#757575' },
+  answer:       { fontSize: 80, fontFamily: 'BubblegumSans_400Regular', minWidth: 100, textAlign: 'center',
                   borderBottomWidth: 3, borderBottomColor: '#BDBDBD' },
   answerPortrait: { fontSize: 48, minWidth: 60 },
   keypad:       { width: 280, padding: 12, justifyContent: 'center', gap: 8 },
-  keypadPortrait: { width: '100%', flex: 0, padding: 8, gap: 6 },
+  keypadPortrait: { width: '100%', flex: 1, padding: 8, paddingBottom: 16, gap: 6, justifyContent: 'flex-end' },
   krow:         { flexDirection: 'row', gap: 8 },
-  kbtn:         { flex: 1, height: 64, backgroundColor: '#E8EAF6', borderRadius: 10,
+  kbtn:         { flex: 1, height: 64, backgroundColor: '#E8EAF6', borderRadius: 20, borderBottomWidth: 4, borderBottomColor: '#9FA8DA',
                   justifyContent: 'center', alignItems: 'center' },
   kbtnPortrait: { height: 52 },
   kbtnSide:     { backgroundColor: '#E8EAF6' },
-  kenter:       { flex: 1, backgroundColor: '#3F51B5' },
-  knum:         { fontSize: 28, fontWeight: 'bold', color: '#212121' },
+  kenter:       { flex: 1, backgroundColor: '#7C4DFF', borderBottomColor: '#4A148C' },
+  knum:         { fontSize: 28, fontFamily: 'BubblegumSans_400Regular', color: '#212121' },
   kenterText:   { color: '#fff' },
   splash:       { ...StyleSheet.absoluteFillObject, backgroundColor: '#43A04799',
                   justifyContent: 'center', alignItems: 'center' },
@@ -340,9 +387,11 @@ const styles = StyleSheet.create({
   endScreen:    { ...StyleSheet.absoluteFillObject, backgroundColor: '#FAFAFA',
                   justifyContent: 'center', alignItems: 'center', gap: 16 },
   celebImg:     { width: 220, height: 220 },
-  endMsg:       { fontSize: 32, fontWeight: 'bold', textAlign: 'center', color: '#212121' },
-  playAgainBtn: { backgroundColor: '#43A047', borderRadius: 12, paddingHorizontal: 40, paddingVertical: 16 },
-  playAgainText:{ color: '#fff', fontSize: 22, fontWeight: 'bold' },
-  quitBtn:      { backgroundColor: '#9E9E9E', borderRadius: 12, paddingHorizontal: 40, paddingVertical: 16 },
-  quitText:     { color: '#fff', fontSize: 22, fontWeight: 'bold' },
+  endMsg:       { fontSize: 32, fontFamily: 'BubblegumSans_400Regular', textAlign: 'center', color: '#212121' },
+  playAgainBtn: { backgroundColor: '#66BB6A', borderBottomColor: '#2E7D32', borderBottomWidth: 5, borderRadius: 30, paddingHorizontal: 40, paddingVertical: 16,
+                  shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 4 },
+  playAgainText:{ color: '#fff', fontSize: 22, fontFamily: 'BubblegumSans_400Regular', textShadowColor: 'rgba(0,0,0,0.2)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 },
+  quitBtn:      { backgroundColor: '#BDBDBD', borderBottomColor: '#757575', borderBottomWidth: 5, borderRadius: 30, paddingHorizontal: 40, paddingVertical: 16,
+                  shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 4 },
+  quitText:     { color: '#fff', fontSize: 22, fontFamily: 'BubblegumSans_400Regular', textShadowColor: 'rgba(0,0,0,0.2)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 },
 });

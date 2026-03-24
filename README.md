@@ -26,6 +26,68 @@ npx expo start --web    # opens in browser
 
 ---
 
+## Asset generation scripts
+
+### TTS audio (TikTok voices)
+
+Generate voice clips using TikTok TTS voices via the gesserit.co API (free, no auth):
+
+```bash
+npm run tts -- <event> "your text here"
+
+# Examples:
+npm run tts -- correct 'Yay, you did it'
+npm run tts -- incorrect 'Oopsie, try again'
+npm run tts -- timeout 'Too slow, be quicker next time'
+```
+
+Events: `correct`, `incorrect`, `timeout`, `all-correct`, `completion`, `completion-bad`, `menu`
+
+Change voice with `export TIKTOK_VOICE=en_us_stitch`. Voice codes: https://github.com/oscie57/tiktok-voice/wiki/Voice-Codes
+
+### Image generation (Google Vertex AI / Imagen 3)
+
+Generate cartoon character and celebration images using Imagen 3 on Vertex AI.
+
+**Setup** (one-time):
+```bash
+gcloud auth application-default login
+```
+
+**Generate images into the library:**
+```bash
+npm run gen:image -- "panda"
+npm run gen:image -- "princess girl, pink dress, tiara"
+npm run gen:image -- "fireworks and confetti"
+```
+
+Images are saved to `assets/images/library/` with transparent backgrounds (white background is auto-removed after generation). This is your image repository -- generate as many as you like.
+
+**Use an image in the app** (symlinks from library into the active folder):
+```bash
+npm run use:image -- characters panda
+npm run use:image -- celebration fireworks-and-confetti
+```
+
+Then add the new image to `src/assets.ts` (the script will remind you).
+
+**Remove backgrounds manually** (for images not generated through the pipeline):
+```bash
+python3 scripts/remove-bg.py assets/images/library/my-image.png    # single file
+python3 scripts/remove-bg.py --all                                  # all library images
+```
+
+The default prompt template is:
+```
+cute chibi [SUBJECT], flat colors, thick black outlines, funny proportions, big head, cartoon, white background, no text
+```
+
+Override with `STYLE_PREFIX` and `STYLE_SUFFIX` env vars. Requires a GCP project with billing enabled (defaults to `droid-api-491000`). Override with `GCP_PROJECT` env var.
+
+**Rate limit:** ~30 requests per minute for Imagen 3. Cost: ~$0.02-0.04 per image.
+
+---
+
 ## Adding new assets
 
 All asset registries live in **`src/assets.ts`**. Drop your file into the right folder, then add one line to that file.

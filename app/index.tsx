@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Image,
+  ImageBackground,
   ImageSourcePropType,
   LayoutChangeEvent,
   StyleSheet,
@@ -11,6 +12,12 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { CHARACTERS, EXPLOSION, LASER, MENU_AUDIO, TITLE_AUDIO } from '../src/assets';
+
+const BTN_GREEN = require('../assets/images/library/btn-green.png');
+const BTN_RED   = require('../assets/images/library/btn-red.png');
+const BTN_BLUE  = require('../assets/images/library/btn-blue.png');
+const ICON_HEART = require('../assets/images/library/heart.png');
+const ICON_UNICORN = require('../assets/images/library/unicorn.png');
 import { BOUNCE } from '../src/config';
 import { playSound, unloadAll } from '../src/sound';
 
@@ -204,8 +211,11 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(TITLE_AUDIO)}>
-        <Text style={styles.title}>Chloe Learns Math</Text>
+      <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(TITLE_AUDIO)} style={styles.titleRow}>
+        <Image source={ICON_HEART} style={styles.titleIcon} resizeMode="contain" />
+        <Text style={styles.titlePink}>chloe </Text>
+        <Text style={styles.titlePurple}>learns math</Text>
+        <Image source={ICON_UNICORN} style={styles.titleIcon} resizeMode="contain" />
       </TouchableOpacity>
 
       <View style={styles.bounceZone} onLayout={onZoneLayout} pointerEvents="box-none">
@@ -221,15 +231,19 @@ export default function HomeScreen() {
       <View style={styles.buttonRow}>
         <View style={styles.col}>
           <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(MENU_AUDIO.addition)}>
-            <Text style={styles.colLabel}>ADDITION</Text>
+            <Text style={styles.colLabel}>addition</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.gameBtn, styles.easy]}
+          <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
             onPress={() => { playSound(MENU_AUDIO.easy); router.push({ pathname: '/game', params: { game: 'Addition', mode: 'EASY' } }); }}>
-            <Text style={styles.gameBtnText}>Easy</Text>
+            <ImageBackground source={BTN_GREEN} style={styles.btnBg} resizeMode="contain">
+              <Text style={styles.gameBtnText}>easy</Text>
+            </ImageBackground>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.gameBtn, styles.hard]}
+          <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
             onPress={() => { playSound(MENU_AUDIO.hard); router.push({ pathname: '/game', params: { game: 'Addition', mode: 'HARD' } }); }}>
-            <Text style={styles.gameBtnText}>Hard</Text>
+            <ImageBackground source={BTN_RED} style={styles.btnBg} resizeMode="contain">
+              <Text style={styles.gameBtnText}>hard</Text>
+            </ImageBackground>
           </TouchableOpacity>
         </View>
 
@@ -237,21 +251,27 @@ export default function HomeScreen() {
 
         <View style={styles.col}>
           <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(MENU_AUDIO.minus)}>
-            <Text style={styles.colLabel}>MINUS</Text>
+            <Text style={styles.colLabel}>minus</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.gameBtn, styles.easy]}
+          <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
             onPress={() => { playSound(MENU_AUDIO.easy); router.push({ pathname: '/game', params: { game: 'Minus', mode: 'EASY' } }); }}>
-            <Text style={styles.gameBtnText}>Easy</Text>
+            <ImageBackground source={BTN_GREEN} style={styles.btnBg} resizeMode="contain">
+              <Text style={styles.gameBtnText}>easy</Text>
+            </ImageBackground>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.gameBtn, styles.hard]}
+          <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
             onPress={() => { playSound(MENU_AUDIO.hard); router.push({ pathname: '/game', params: { game: 'Minus', mode: 'HARD' } }); }}>
-            <Text style={styles.gameBtnText}>Hard</Text>
+            <ImageBackground source={BTN_RED} style={styles.btnBg} resizeMode="contain">
+              <Text style={styles.gameBtnText}>hard</Text>
+            </ImageBackground>
           </TouchableOpacity>
         </View>
       </View>
 
-      <TouchableOpacity style={styles.historyBtn} onPress={() => router.push('/history')}>
-        <Text style={styles.historyBtnText}>History</Text>
+      <TouchableOpacity activeOpacity={0.8} style={styles.historyBtn} onPress={() => router.push('/history')}>
+        <ImageBackground source={BTN_BLUE} style={styles.btnBgHistory} resizeMode="contain">
+          <Text style={styles.historyBtnText}>history</Text>
+        </ImageBackground>
       </TouchableOpacity>
     </View>
   );
@@ -259,18 +279,23 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container:     { flex: 1, backgroundColor: '#FAFAFA' },
-  title:         { textAlign: 'center', fontSize: 38, fontWeight: 'bold', color: '#3F51B5', paddingTop: 24, paddingBottom: 12 },
-  bounceZone:    { flex: 1, overflow: 'hidden' },
-  bounceImg:     { position: 'absolute', width: IMG_SIZE, height: IMG_SIZE },
+  titleRow:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: 24, paddingBottom: 12, gap: 6 },
+  titleIcon:     { width: 40, height: 40 },
+  titlePink:     { fontSize: 38, fontFamily: 'BubblegumSans_400Regular', color: '#F48FB1' },
+  titlePurple:   { fontSize: 38, fontFamily: 'BubblegumSans_400Regular', color: '#B39DDB' },
+  bounceZone:    { flex: 1, overflow: 'hidden', position: 'relative' },
+  bounceImg:     { position: 'absolute', width: IMG_SIZE, height: IMG_SIZE, overflow: 'hidden' },
   imgSize:       { width: IMG_SIZE, height: IMG_SIZE },
   buttonRow:     { flexDirection: 'row', paddingHorizontal: 24, paddingBottom: 16 },
   col:           { flex: 1, alignItems: 'center' },
-  colLabel:      { fontSize: 15, fontWeight: 'bold', color: '#9E9E9E', letterSpacing: 1.5, marginBottom: 10 },
-  gameBtn:       { width: '90%', height: 64, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
-  easy:          { backgroundColor: '#43A047' },
-  hard:          { backgroundColor: '#E53935' },
-  gameBtnText:   { color: '#fff', fontSize: 22, fontWeight: 'bold' },
+  colLabel:      { fontSize: 30, fontFamily: 'BubblegumSans_400Regular', color: '#9E9E9E', letterSpacing: 1.5, marginBottom: 10 },
+  gameBtn:       { width: '100%', alignItems: 'center', marginBottom: 4 },
+  btnBg:         { width: '100%', height: 90, justifyContent: 'center', alignItems: 'center' },
+  gameBtnText:   { color: '#fff', fontSize: 26, fontFamily: 'BubblegumSans_400Regular',
+                   textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 3 },
   divider:       { width: 1, backgroundColor: '#E0E0E0', marginHorizontal: 12 },
-  historyBtn:    { alignSelf: 'center', backgroundColor: '#3F51B5', borderRadius: 12, paddingHorizontal: 32, paddingVertical: 14, marginBottom: 20 },
-  historyBtnText:{ color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  historyBtn:    { alignSelf: 'center', marginBottom: 20 },
+  btnBgHistory:  { width: 200, height: 90, justifyContent: 'center', alignItems: 'center' },
+  historyBtnText:{ color: '#fff', fontSize: 22, fontFamily: 'BubblegumSans_400Regular',
+                   textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 3 },
 });

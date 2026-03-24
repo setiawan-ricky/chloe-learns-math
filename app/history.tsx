@@ -18,22 +18,22 @@ export default function HistoryScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.back}>← History</Text>
+          <Text style={styles.back}>← history</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView>
         {entries.length === 0 ? (
-          <Text style={styles.empty}>No games played yet!</Text>
+          <Text style={styles.empty}>no games played yet!</Text>
         ) : (
           <>
             {/* Column headers */}
             <View style={[styles.row, styles.headerRow]}>
-              <Text style={[styles.cell, styles.headerCell, { flex: 1.4 }]}>Game</Text>
-              <Text style={[styles.cell, styles.headerCell]}>Mode</Text>
-              <Text style={[styles.cell, styles.headerCell]}>Score</Text>
-              <Text style={[styles.cell, styles.headerCell]}>Time</Text>
-              <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Date</Text>
+              <Text style={[styles.cell, styles.headerCell, { flex: 1.4 }]}>game</Text>
+              <Text style={[styles.cell, styles.headerCell]}>mode</Text>
+              <Text style={[styles.cell, styles.headerCell]}>score</Text>
+              <Text style={[styles.cell, styles.headerCell]}>time</Text>
+              <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>date</Text>
             </View>
 
             {entries.map((e, i) => (
@@ -58,11 +58,11 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   root:       { flex: 1, backgroundColor: '#FAFAFA' },
   header:     { backgroundColor: '#3F51B5', paddingHorizontal: 20, paddingVertical: 16 },
-  back:       { color: '#fff', fontSize: 22 },
-  empty:      { textAlign: 'center', fontSize: 20, color: '#9E9E9E', marginTop: 48 },
+  back:       { color: '#fff', fontSize: 22, fontFamily: 'BubblegumSans_400Regular' },
+  empty:      { textAlign: 'center', fontSize: 20, fontFamily: 'BubblegumSans_400Regular', color: '#9E9E9E', marginTop: 48 },
   row:        { flexDirection: 'row', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: '#fff' },
   headerRow:  { backgroundColor: '#EEEEEE' },
-  cell:       { flex: 1, fontSize: 17, color: '#212121' },
-  headerCell: { fontSize: 15, fontWeight: 'bold', color: '#757575' },
+  cell:       { flex: 1, fontSize: 17, fontFamily: 'BubblegumSans_400Regular', color: '#212121' },
+  headerCell: { fontSize: 15, color: '#757575' },
   separator:  { height: 1, backgroundColor: '#E0E0E0' },
 });
