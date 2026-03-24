@@ -21,7 +21,8 @@ Changes are always made here first, then ported to legacy.
 ## Math Game
 
 - [x] 5-question rounds
-- [x] Landscape orientation lock
+- [x] Landscape orientation lock (Android/iOS)
+- [x] Web: responsive portrait layout (keypad below question area)
 - [x] Custom number keypad (0-9, backspace, OK)
 - [x] Max 2-digit input
 - [x] Number range: 1-10

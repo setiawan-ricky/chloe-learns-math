@@ -2,9 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Image,
   ImageSourcePropType,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -230,45 +232,48 @@ export default function GameScreen() {
     setAnswerColor('#212121');
   }, []);
 
+  const { width, height } = useWindowDimensions();
+  const isPortrait = Platform.OS === 'web' && height > width;
+
   const operator = game === 'Minus' ? '−' : '+';
   const modeColor = mode === 'EASY' ? '#43A047' : '#E53935';
 
   return (
-    <View style={styles.root}>
-      <View style={styles.left}>
+    <View style={[styles.root, isPortrait && styles.rootPortrait]}>
+      <View style={[styles.left, isPortrait && styles.leftPortrait]}>
         <View style={styles.topRow}>
-          <Text style={styles.score}>Score: {score}</Text>
-          <Text style={[styles.modeLabel, { color: modeColor }]}>{game} • {mode}</Text>
-          <Text style={styles.progress}>{questionIdx + 1} / {ROUND_SIZE}</Text>
-          <Text style={[styles.timer, { color: timerColor }]}>{timeLeft}</Text>
+          <Text style={[styles.score, isPortrait && styles.scorePortrait]}>Score: {score}</Text>
+          <Text style={[styles.modeLabel, { color: modeColor }, isPortrait && styles.modeLabelPortrait]}>{game} • {mode}</Text>
+          <Text style={[styles.progress, isPortrait && styles.progressPortrait]}>{questionIdx + 1} / {ROUND_SIZE}</Text>
+          <Text style={[styles.timer, { color: timerColor }, isPortrait && styles.timerPortrait]}>{timeLeft}</Text>
         </View>
         <View style={styles.equation}>
-          <Text style={styles.num}>{question.num1}</Text>
-          <Text style={styles.op}>{operator}</Text>
-          <Text style={styles.num}>{question.num2}</Text>
-          <Text style={styles.equals}>=</Text>
-          <Text style={[styles.answer, { color: answerColor }]}>{input || '?'}</Text>
+          <Text style={[styles.num, isPortrait && styles.numPortrait]}>{question.num1}</Text>
+          <Text style={[styles.op, isPortrait && styles.opPortrait]}>{operator}</Text>
+          <Text style={[styles.num, isPortrait && styles.numPortrait]}>{question.num2}</Text>
+          <Text style={[styles.equals, isPortrait && styles.opPortrait]}>=</Text>
+          <Text style={[styles.answer, { color: answerColor }, isPortrait && styles.answerPortrait]}>{input || '?'}</Text>
         </View>
       </View>
 
-      <View style={styles.keypad}>
+      <View style={[styles.keypad, isPortrait && styles.keypadPortrait]}>
         {[['7','8','9'],['4','5','6'],['1','2','3']].map(row => (
           <View key={row[0]} style={styles.krow}>
             {row.map(d => (
-              <TouchableOpacity key={d} style={styles.kbtn} onPress={() => onDigit(d)}>
+              <TouchableOpacity key={d} style={[styles.kbtn, isPortrait && styles.kbtnPortrait]} onPress={() => onDigit(d)}>
                 <Text style={styles.knum}>{d}</Text>
               </TouchableOpacity>
             ))}
           </View>
         ))}
         <View style={styles.krow}>
-          <TouchableOpacity style={[styles.kbtn, styles.kbtnSide]} onPress={() => onDigit('0')}>
+          <TouchableOpacity style={[styles.kbtn, styles.kbtnSide, isPortrait && styles.kbtnPortrait]} onPress={() => onDigit('0')}>
             <Text style={styles.knum}>0</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.kbtn, styles.kbtnSide]} onPress={onBackspace}>
+          <TouchableOpacity style={[styles.kbtn, styles.kbtnSide, isPortrait && styles.kbtnPortrait]} onPress={onBackspace}>
             <Text style={styles.knum}>⌫</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.kbtn, styles.kenter]} onPress={onEnter}>
+          <TouchableOpacity style={[styles.kbtn, styles.kenter, isPortrait && styles.kbtnPortrait]} onPress={onEnter}>
             <Text style={[styles.knum, styles.kenterText]}>OK</Text>
           </TouchableOpacity>
         </View>
@@ -298,22 +303,33 @@ export default function GameScreen() {
 
 const styles = StyleSheet.create({
   root:         { flex: 1, flexDirection: 'row', backgroundColor: '#FAFAFA' },
+  rootPortrait: { flexDirection: 'column' },
   left:         { flex: 1, padding: 20 },
+  leftPortrait: { flex: 0, padding: 16 },
   topRow:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   score:        { fontSize: 22, fontWeight: 'bold', color: '#3F51B5' },
+  scorePortrait:{ fontSize: 18 },
   modeLabel:    { fontSize: 18, fontWeight: 'bold' },
+  modeLabelPortrait: { fontSize: 14 },
   progress:     { fontSize: 22, color: '#757575' },
+  progressPortrait: { fontSize: 18 },
   timer:        { fontSize: 38, fontWeight: 'bold', minWidth: 56, textAlign: 'right' },
+  timerPortrait:{ fontSize: 28, minWidth: 44 },
   equation:     { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
   num:          { fontSize: 80, fontWeight: 'bold', color: '#212121' },
+  numPortrait:  { fontSize: 48 },
   op:           { fontSize: 72, color: '#757575' },
+  opPortrait:   { fontSize: 40 },
   equals:       { fontSize: 72, color: '#757575' },
   answer:       { fontSize: 80, fontWeight: 'bold', minWidth: 100, textAlign: 'center',
                   borderBottomWidth: 3, borderBottomColor: '#BDBDBD' },
+  answerPortrait: { fontSize: 48, minWidth: 60 },
   keypad:       { width: 280, padding: 12, justifyContent: 'center', gap: 8 },
+  keypadPortrait: { width: '100%', flex: 1, padding: 8, gap: 6 },
   krow:         { flexDirection: 'row', gap: 8 },
   kbtn:         { flex: 1, height: 64, backgroundColor: '#E8EAF6', borderRadius: 10,
                   justifyContent: 'center', alignItems: 'center' },
+  kbtnPortrait: { height: 52 },
   kbtnSide:     { backgroundColor: '#E8EAF6' },
   kenter:       { flex: 1, backgroundColor: '#3F51B5' },
   knum:         { fontSize: 28, fontWeight: 'bold', color: '#212121' },
