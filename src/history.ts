@@ -106,6 +106,7 @@ export interface HistoryEntry {
   total:   number;
   secs:    number;
   date:    string;
+  ts?:     number; // epoch ms, added for reliable date comparison
 }
 
 export async function getScore(): Promise<number> {
@@ -123,13 +124,29 @@ export async function incrementScore(): Promise<number> {
   return score;
 }
 
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function fmtDate(d: Date): string {
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mmm = MONTHS[d.getMonth()];
+  const yyyy = d.getFullYear();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${dd} ${mmm} ${yyyy} ${hh}:${mm}`;
+}
+
+function fmtDateOnly(d: Date): string {
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mmm = MONTHS[d.getMonth()];
+  const yyyy = d.getFullYear();
+  return `${dd} ${mmm} ${yyyy}`;
+}
+
 export async function saveHistoryEntry(entry: Omit<HistoryEntry, 'date'>): Promise<void> {
   try {
-    const date = new Date().toLocaleDateString('en-GB', {
-      day: '2-digit', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
-    const record: HistoryEntry = { ...entry, date };
+    const now = new Date();
+    const date = fmtDate(now);
+    const record: HistoryEntry = { ...entry, date, ts: now.getTime() };
     const raw = await AsyncStorage.getItem(HISTORY.STORAGE_KEY);
     let entries: HistoryEntry[] = [];
     if (raw) {
@@ -141,19 +158,35 @@ export async function saveHistoryEntry(entry: Omit<HistoryEntry, 'date'>): Promi
   } catch {}
 }
 
+function parseEntryDate(dateStr: string): Date | null {
+  if (!dateStr) return null;
+  // Handle formats: "23 Mar 2026 22:41" or "23 Mar 2026, 22:41"
+  const m = dateStr.match(/(\d{1,2})\s+(\w{3})\s+(\d{4})/);
+  if (!m) return null;
+  const day = parseInt(m[1], 10);
+  const monIdx = MONTHS.indexOf(m[2]);
+  const year = parseInt(m[3], 10);
+  if (monIdx < 0 || isNaN(day) || isNaN(year)) return null;
+  return new Date(year, monIdx, day);
+}
+
 export async function getGamesToday(): Promise<number> {
   try {
     const raw = await AsyncStorage.getItem(HISTORY.STORAGE_KEY);
     if (!raw) return 0;
     const entries: HistoryEntry[] = JSON.parse(raw);
     if (!Array.isArray(entries)) return 0;
-    // Match using the same en-GB format that saveHistoryEntry uses
-    const todayStr = new Date().toLocaleDateString('en-GB', {
-      day: '2-digit', month: 'short', year: 'numeric',
-    });
+    const now = new Date();
+    const todayY = now.getFullYear();
+    const todayM = now.getMonth();
+    const todayD = now.getDate();
+    const startOfDay = new Date(todayY, todayM, todayD).getTime();
+    const endOfDay = startOfDay + 86400000;
     return entries.filter(e => {
-      const datePart = e.date?.replace(/[,\s]+\d{1,2}:\d{2}$/, '').replace(/,$/, '');
-      return datePart === todayStr;
+      if (e.ts) return e.ts >= startOfDay && e.ts < endOfDay;
+      const parsed = parseEntryDate(e.date);
+      if (!parsed) return false;
+      return parsed.getFullYear() === todayY && parsed.getMonth() === todayM && parsed.getDate() === todayD;
     }).length;
   } catch { return 0; }
 }
