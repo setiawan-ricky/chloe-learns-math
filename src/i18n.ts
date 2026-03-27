@@ -2,8 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext } from 'react';
 
 export type Lang = 'en' | 'zh';
+export type AppMode = 'math' | 'english';
 
 const LANG_KEY = 'app_language';
+const MODE_KEY = 'app_mode';
 
 export async function loadLang(): Promise<Lang> {
   try {
@@ -16,8 +18,22 @@ export async function saveLang(lang: Lang): Promise<void> {
   await AsyncStorage.setItem(LANG_KEY, lang);
 }
 
-interface LangContextValue { lang: Lang; setLang: (l: Lang) => void; }
-export const LangContext = createContext<LangContextValue>({ lang: 'en', setLang: () => {} });
+export async function loadMode(): Promise<AppMode> {
+  try {
+    const v = await AsyncStorage.getItem(MODE_KEY);
+    return v === 'english' ? 'english' : 'math';
+  } catch { return 'math'; }
+}
+
+export async function saveMode(mode: AppMode): Promise<void> {
+  await AsyncStorage.setItem(MODE_KEY, mode);
+}
+
+interface LangContextValue {
+  lang: Lang; setLang: (l: Lang) => void;
+  mode: AppMode; setMode: (m: AppMode) => void;
+}
+export const LangContext = createContext<LangContextValue>({ lang: 'en', setLang: () => {}, mode: 'math', setMode: () => {} });
 export const useLang = () => useContext(LangContext);
 
 const T = {
@@ -57,6 +73,15 @@ const T = {
     answered: (a: number) => `answered ${a}`,
     timeout: 'timeout',
     gamesToday: 'times played today',
+    titleEnglish: 'chloe learns english',
+    titleRestEnglish: 'learns english',
+    spelling: 'spelling',
+    hearWord: 'word',
+    hearSentence: 'sentence',
+    spelledCorrectly: 'well done!',
+    wrongLetter: 'try again!',
+    switchToEnglish: 'chloe learns english',
+    switchToMath: 'chloe learns math',
   },
   zh: {
     title: '紫怡学数学',
@@ -94,6 +119,15 @@ const T = {
     answered: (a: number) => `回答了 ${a}`,
     timeout: '超时',
     gamesToday: '今天玩的次数',
+    titleEnglish: '紫怡学英语',
+    titleRestEnglish: '学英语',
+    spelling: '拼写',
+    hearWord: '单词',
+    hearSentence: '句子',
+    spelledCorrectly: '太棒了！',
+    wrongLetter: '再试试！',
+    switchToEnglish: '紫怡学英语',
+    switchToMath: '紫怡学数学',
   },
 };
 

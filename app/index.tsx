@@ -19,8 +19,10 @@ const BTN_GREEN  = require('../assets/images/library/btn-green.png');
 const BTN_RED    = require('../assets/images/library/btn-red.png');
 const BTN_BLUE   = require('../assets/images/library/btn-blue.png');
 const BTN_ORANGE = require('../assets/images/library/btn-orange.png');
+const BTN_PINK   = require('../assets/images/library/btn-pink.png');
 const ICON_HEART = require('../assets/images/library/heart.png');
 const ICON_BLACKBOARD = require('../assets/images/library/blackboard.png');
+const ICON_BOOK = require('../assets/images/library/book.png');
 const FLAG_US = require('../assets/images/library/flag-us.png');
 const FLAG_CN = require('../assets/images/library/flag-cn.png');
 import { BOUNCE } from '../src/config';
@@ -65,9 +67,10 @@ function makeInitialPhysics(count: number): PhysicsState[] {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { lang, setLang } = useLang();
+  const { lang, setLang, mode, setMode } = useLang();
   const s = t(lang);
   const audio = getAudio(lang);
+  const isMath = mode === 'math';
 
   const [gamesToday, setGamesToday] = useState(0);
   useFocusEffect(useCallback(() => { getGamesToday().then(setGamesToday); }, []));
@@ -223,11 +226,11 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.topBar}>
-        <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(audio.title)} style={styles.titleRow}>
+        <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(isMath ? audio.title : audio.titleEnglish)} style={styles.titleRow}>
           <Image source={ICON_HEART} style={styles.titleIcon} resizeMode="contain" />
           <Text style={styles.titlePink}>{s.titleChloe}</Text>
-          <Text style={styles.titlePurple}>{s.titleRest}</Text>
-          <Image source={ICON_BLACKBOARD} style={styles.titleIcon} resizeMode="contain" />
+          <Text style={styles.titlePurple}>{isMath ? s.titleRest : s.titleRestEnglish}</Text>
+          <Image source={isMath ? ICON_BLACKBOARD : ICON_BOOK} style={styles.titleIcon} resizeMode="contain" />
         </TouchableOpacity>
         <View style={styles.flagRow}>
           <TouchableOpacity onPress={() => setLang('en')} activeOpacity={0.7} style={[styles.flagBtn, lang === 'en' && styles.flagActive]}>
@@ -250,52 +253,91 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.buttonRow}>
-        <View style={styles.col}>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(audio.menu.addition)}>
-            <Text style={styles.colLabel}>{s.addition}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
-            onPress={() => { playSound(audio.menu.easy); router.push({ pathname: '/game', params: { game: 'Addition', mode: 'EASY' } }); }}>
-            <ImageBackground source={BTN_GREEN} style={styles.btnBg} resizeMode="contain">
-              <Text style={styles.gameBtnText}>{s.easy}</Text>
-            </ImageBackground>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
-            onPress={() => { playSound(audio.menu.hard); router.push({ pathname: '/game', params: { game: 'Addition', mode: 'HARD' } }); }}>
-            <ImageBackground source={BTN_RED} style={styles.btnBg} resizeMode="contain">
-              <Text style={styles.gameBtnText}>{s.hard}</Text>
-            </ImageBackground>
-          </TouchableOpacity>
-        </View>
+        {isMath ? (
+          <>
+            <View style={styles.col}>
+              <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(audio.menu.addition)}>
+                <Text style={styles.colLabel}>{s.addition}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
+                onPress={() => { playSound(audio.menu.easy); router.push({ pathname: '/game', params: { game: 'Addition', mode: 'EASY' } }); }}>
+                <ImageBackground source={BTN_GREEN} style={styles.btnBg} resizeMode="contain">
+                  <Text style={styles.gameBtnText}>{s.easy}</Text>
+                </ImageBackground>
+              </TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
+                onPress={() => { playSound(audio.menu.hard); router.push({ pathname: '/game', params: { game: 'Addition', mode: 'HARD' } }); }}>
+                <ImageBackground source={BTN_RED} style={styles.btnBg} resizeMode="contain">
+                  <Text style={styles.gameBtnText}>{s.hard}</Text>
+                </ImageBackground>
+              </TouchableOpacity>
+            </View>
 
-        <TouchableOpacity activeOpacity={0.7} style={styles.todayCol} onPress={() => playSound(audio.menu.gamesToday)}>
-          <Text style={styles.todayCount}>{gamesToday}</Text>
-          <Text style={styles.todayLabel}>{s.gamesToday}</Text>
-        </TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.7} style={styles.todayCol} onPress={() => playSound(audio.menu.gamesToday)}>
+              <Text style={styles.todayCount}>{gamesToday}</Text>
+              <Text style={styles.todayLabel}>{s.gamesToday}</Text>
+            </TouchableOpacity>
 
-        <View style={styles.col}>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(audio.menu.minus)}>
-            <Text style={styles.colLabel}>{s.minus}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
-            onPress={() => { playSound(audio.menu.easy); router.push({ pathname: '/game', params: { game: 'Minus', mode: 'EASY' } }); }}>
-            <ImageBackground source={BTN_GREEN} style={styles.btnBg} resizeMode="contain">
-              <Text style={styles.gameBtnText}>{s.easy}</Text>
-            </ImageBackground>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
-            onPress={() => { playSound(audio.menu.hard); router.push({ pathname: '/game', params: { game: 'Minus', mode: 'HARD' } }); }}>
-            <ImageBackground source={BTN_RED} style={styles.btnBg} resizeMode="contain">
-              <Text style={styles.gameBtnText}>{s.hard}</Text>
-            </ImageBackground>
-          </TouchableOpacity>
-        </View>
+            <View style={styles.col}>
+              <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(audio.menu.minus)}>
+                <Text style={styles.colLabel}>{s.minus}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
+                onPress={() => { playSound(audio.menu.easy); router.push({ pathname: '/game', params: { game: 'Minus', mode: 'EASY' } }); }}>
+                <ImageBackground source={BTN_GREEN} style={styles.btnBg} resizeMode="contain">
+                  <Text style={styles.gameBtnText}>{s.easy}</Text>
+                </ImageBackground>
+              </TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
+                onPress={() => { playSound(audio.menu.hard); router.push({ pathname: '/game', params: { game: 'Minus', mode: 'HARD' } }); }}>
+                <ImageBackground source={BTN_RED} style={styles.btnBg} resizeMode="contain">
+                  <Text style={styles.gameBtnText}>{s.hard}</Text>
+                </ImageBackground>
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : (
+          <>
+            <View style={styles.col}>
+              <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(audio.menu.spelling)}>
+                <Text style={styles.colLabel}>{s.spelling}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
+                onPress={() => { playSound(audio.menu.easy); router.push({ pathname: '/spelling', params: { mode: 'EASY' } }); }}>
+                <ImageBackground source={BTN_GREEN} style={styles.btnBg} resizeMode="contain">
+                  <Text style={styles.gameBtnText}>{s.easy}</Text>
+                </ImageBackground>
+              </TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
+                onPress={() => { playSound(audio.menu.hard); router.push({ pathname: '/spelling', params: { mode: 'HARD' } }); }}>
+                <ImageBackground source={BTN_RED} style={styles.btnBg} resizeMode="contain">
+                  <Text style={styles.gameBtnText}>{s.hard}</Text>
+                </ImageBackground>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity activeOpacity={0.7} style={styles.todayCol} onPress={() => playSound(audio.menu.gamesToday)}>
+              <Text style={styles.todayCount}>{gamesToday}</Text>
+              <Text style={styles.todayLabel}>{s.gamesToday}</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
       <View style={styles.bottomRow}>
         <TouchableOpacity activeOpacity={0.8} style={styles.bottomBtn} onPress={() => router.push('/history')}>
           <ImageBackground source={BTN_ORANGE} style={styles.btnBgBottom} resizeMode="contain">
             <Text style={styles.bottomBtnText}>{s.history}</Text>
+          </ImageBackground>
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.8} style={styles.bottomBtn}
+          onPress={() => {
+            const newMode = isMath ? 'english' : 'math';
+            setMode(newMode);
+            playSound(newMode === 'english' ? audio.titleEnglish : audio.title);
+          }}>
+          <ImageBackground source={BTN_PINK} style={styles.btnBgBottom} resizeMode="contain">
+            <Text style={styles.bottomBtnText}>{isMath ? 'english' : 'math'}</Text>
           </ImageBackground>
         </TouchableOpacity>
         <TouchableOpacity activeOpacity={0.8} style={styles.bottomBtn} onPress={() => router.push('/stats')}>

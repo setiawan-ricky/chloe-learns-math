@@ -256,7 +256,7 @@ export default function GameScreen() {
     } else {
       recordQuestionResult(game, num1, num2, false);
       recordMistake(game, num1, num2, answer);
-      playRandomSound(AUDIO.incorrect);
+      playRandomSound(mode === 'HARD' ? AUDIO.incorrectHard : AUDIO.incorrect);
       setAnswerColor('#F44336');
       if (mode === 'HARD') {
         trackedTimeout(() => {

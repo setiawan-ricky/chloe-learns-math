@@ -19,6 +19,24 @@ export async function playSound(source: number): Promise<void> {
   } catch {}
 }
 
+export async function playSoundSequence(sources: number[]): Promise<void> {
+  for (const src of sources) {
+    await new Promise<void>((resolve) => {
+      Audio.Sound.createAsync(src).then(({ sound }) => {
+        activeSounds.add(sound);
+        sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            activeSounds.delete(sound);
+            sound.unloadAsync();
+            resolve();
+          }
+        });
+        sound.playAsync();
+      }).catch(() => resolve());
+    });
+  }
+}
+
 export async function playRandomSound(clips: number[]): Promise<void> {
   if (clips.length === 0) return;
   return playSound(pickRandom(clips));

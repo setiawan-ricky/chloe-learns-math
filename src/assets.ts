@@ -38,6 +38,14 @@ export const CELEBRATIONS = [
   require('../assets/images/celebration/celebration_14.png'),
   require('../assets/images/celebration/celebration_15.png'),
   require('../assets/images/celebration/celebration_16.png'),
+  require('../assets/images/celebration/celebration_17.png'),
+  require('../assets/images/celebration/celebration_18.png'),
+  require('../assets/images/celebration/celebration_19.png'),
+  require('../assets/images/celebration/celebration_20.png'),
+  require('../assets/images/celebration/celebration_21.png'),
+  require('../assets/images/celebration/celebration_22.png'),
+  require('../assets/images/celebration/celebration_23.png'),
+  require('../assets/images/celebration/celebration_24.png'),
 ];
 
 export const EXPLOSION = require('../assets/images/explosion.png');
@@ -48,12 +56,14 @@ import type { Lang } from './i18n';
 
 const AUDIO_EN = {
   title: require('../assets/audio/en/chloe-learns-math.mp3'),
+  titleEnglish: require('../assets/audio/en/chloe-learns-english.mp3'),
   menu: {
     easy: require('../assets/audio/en/menu/easy.mp3'),
     hard: require('../assets/audio/en/menu/hard.mp3'),
     addition: require('../assets/audio/en/menu/addition.mp3'),
     minus: require('../assets/audio/en/menu/minus.mp3'),
     gamesToday: require('../assets/audio/en/menu/games-today.mp3'),
+    spelling: require('../assets/audio/en/menu/spelling.mp3'),
   },
   correct: [
     require('../assets/audio/en/correct/absolutely-right.mp3'),
@@ -85,6 +95,18 @@ const AUDIO_EN = {
     require('../assets/audio/en/incorrect/thats-okay.mp3'),
     require('../assets/audio/en/incorrect/nearly-there.mp3'),
     require('../assets/audio/en/incorrect/not-that-one.mp3'),
+  ],
+  incorrectHard: [
+    require('../assets/audio/en/incorrect/almost-not-correct.mp3'),
+    require('../assets/audio/en/incorrect/not-quite.mp3'),
+    require('../assets/audio/en/incorrect/doesnt-seem-right.mp3'),
+    require('../assets/audio/en/incorrect/looks-a-little-wrong.mp3'),
+    require('../assets/audio/en/incorrect/so-close.mp3'),
+    require('../assets/audio/en/incorrect/not-that-one.mp3'),
+    require('../assets/audio/en/incorrect/oh-no.mp3'),
+    require('../assets/audio/en/incorrect/oopsie.mp3'),
+    require('../assets/audio/en/incorrect/not-this-time.mp3'),
+    require('../assets/audio/en/incorrect/uh-oh.mp3'),
   ],
   allCorrect: [
     require('../assets/audio/en/all-correct/too-easy-for-chloe.mp3'),
@@ -120,12 +142,14 @@ const AUDIO_EN = {
 
 const AUDIO_ZH = {
   title: require('../assets/audio/zh/chloe-learns-math.mp3'),
+  titleEnglish: require('../assets/audio/zh/chloe-learns-english.mp3'),
   menu: {
     easy: require('../assets/audio/zh/menu/easy.mp3'),
     hard: require('../assets/audio/zh/menu/hard.mp3'),
     addition: require('../assets/audio/zh/menu/addition.mp3'),
     minus: require('../assets/audio/zh/menu/minus.mp3'),
     gamesToday: require('../assets/audio/zh/menu/games-today.mp3'),
+    spelling: require('../assets/audio/zh/menu/spelling.mp3'),
   },
   correct: [
     require('../assets/audio/zh/correct/da-dui-le.mp3'),
@@ -157,6 +181,17 @@ const AUDIO_ZH = {
     require('../assets/audio/zh/incorrect/mei-guan-xi.mp3'),
     require('../assets/audio/zh/incorrect/kuai-yao-dui-le.mp3'),
     require('../assets/audio/zh/incorrect/bu-shi-zhe-ge.mp3'),
+  ],
+  incorrectHard: [
+    require('../assets/audio/zh/incorrect/cha-yi-dian.mp3'),
+    require('../assets/audio/zh/incorrect/hao-xiang-bu-dui.mp3'),
+    require('../assets/audio/zh/incorrect/you-dian-bu-dui.mp3'),
+    require('../assets/audio/zh/incorrect/hen-jie-jin.mp3'),
+    require('../assets/audio/zh/incorrect/bu-shi-zhe-ge.mp3'),
+    require('../assets/audio/zh/incorrect/ai-ya.mp3'),
+    require('../assets/audio/zh/incorrect/bu-dui-o.mp3'),
+    require('../assets/audio/zh/incorrect/zhe-ci-bu-dui.mp3'),
+    require('../assets/audio/zh/incorrect/zao-gao.mp3'),
   ],
   allCorrect: [
     require('../assets/audio/zh/all-correct/tai-jian-dan-le.mp3'),

@@ -16,6 +16,10 @@ function questionKey(game: string, num1: number, num2: number): string {
   return `${game}:${num1}${op}${num2}`;
 }
 
+function spellingKey(word: string): string {
+  return `Spelling:${word}`;
+}
+
 let statsMutex: Promise<void> = Promise.resolve();
 
 export function recordQuestionResult(
@@ -37,6 +41,25 @@ export function recordQuestionResult(
   return statsMutex;
 }
 
+export function recordSpellingResult(
+  word: string, correct: boolean,
+): Promise<void> {
+  statsMutex = statsMutex.then(async () => {
+    try {
+      const raw = await AsyncStorage.getItem(HISTORY.QUESTION_STATS_KEY);
+      const stats: Record<string, QuestionStat> = raw ? JSON.parse(raw) : {};
+      const k = spellingKey(word);
+      if (!stats[k]) {
+        stats[k] = { key: k, game: 'Spelling', num1: 0, num2: 0, score: 0, attempts: 0 };
+      }
+      stats[k].score += correct ? 1 : -1;
+      stats[k].attempts += 1;
+      await AsyncStorage.setItem(HISTORY.QUESTION_STATS_KEY, JSON.stringify(stats));
+    } catch {}
+  });
+  return statsMutex;
+}
+
 export async function loadQuestionStats(): Promise<QuestionStat[]> {
   try {
     const raw = await AsyncStorage.getItem(HISTORY.QUESTION_STATS_KEY);
@@ -49,13 +72,15 @@ export async function loadQuestionStats(): Promise<QuestionStat[]> {
 }
 
 export interface MistakeEntry {
-  key:      string;  // e.g. "Addition:3+5"
+  key:      string;  // e.g. "Addition:3+5" or "Spelling:cat"
   game:     string;
   num1:     number;
   num2:     number;
   answer:   number | null;  // null = timeout
   correct:  number;
   date:     string;
+  word?:    string;    // spelling: the target word
+  attempt?: string;    // spelling: what was spelled
 }
 
 export async function recordMistake(
@@ -69,6 +94,26 @@ export async function recordMistake(
       hour: '2-digit', minute: '2-digit',
     });
     const entry: MistakeEntry = { key: k, game, num1, num2, answer, correct: correctAns, date };
+    const raw = await AsyncStorage.getItem(HISTORY.MISTAKE_LOG_KEY);
+    let log: MistakeEntry[] = [];
+    if (raw) { try { log = JSON.parse(raw); } catch { log = []; } }
+    log.unshift(entry);
+    if (log.length > HISTORY.MAX_MISTAKES) log.length = HISTORY.MAX_MISTAKES;
+    await AsyncStorage.setItem(HISTORY.MISTAKE_LOG_KEY, JSON.stringify(log));
+  } catch {}
+}
+
+export async function recordSpellingMistake(
+  word: string, attempt: string,
+): Promise<void> {
+  try {
+    const k = spellingKey(word);
+    const date = fmtDate(new Date());
+    const entry: MistakeEntry = {
+      key: k, game: 'Spelling', num1: 0, num2: 0,
+      answer: null, correct: 0, date,
+      word, attempt,
+    };
     const raw = await AsyncStorage.getItem(HISTORY.MISTAKE_LOG_KEY);
     let log: MistakeEntry[] = [];
     if (raw) { try { log = JSON.parse(raw); } catch { log = []; } }

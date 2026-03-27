@@ -62,6 +62,9 @@ export default function StatsScreen() {
   }
 
   function formatQuestion(s: QuestionStat) {
+    if (s.game === 'Spelling') {
+      return s.key.replace('Spelling:', '');
+    }
     const op = s.game === 'Minus' ? ' − ' : ' + ';
     const ans = s.game === 'Minus' ? s.num1 - s.num2 : s.num1 + s.num2;
     return `${s.num1}${op}${s.num2} = ${ans}`;
@@ -138,7 +141,9 @@ export default function StatsScreen() {
                         mistakes.map((m, i) => (
                           <View key={i} style={styles.detailRow}>
                             <Text style={styles.detailText}>
-                              {m.answer === null ? str.timeout : str.answered(m.answer)}
+                              {m.game === 'Spelling'
+                                ? `"${m.attempt ?? '?'}" → "${m.word ?? '?'}"`
+                                : m.answer === null ? str.timeout : str.answered(m.answer)}
                             </Text>
                             <Text style={styles.detailDate}>{m.date}</Text>
                           </View>
