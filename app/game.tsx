@@ -24,17 +24,22 @@ type ModeType = 'EASY' | 'HARD';
 const { ROUND_SIZE, TIMER_EASY, TIMER_HARD, TIMER_WARN_EASY, TIMER_WARN_HARD,
         MAX_DIGITS, NUMBER_RANGE, CORRECT_SPLASH_MS, WRONG_ADVANCE_MS, WRONG_RESET_MS } = GAME;
 
-function randomQuestion(game: GameType): { num1: number; num2: number } {
+function randomQuestion(game: GameType, prev?: { num1: number; num2: number }): { num1: number; num2: number } {
   const { min, max } = NUMBER_RANGE;
-  if (game === 'Minus') {
-    const num1 = Math.floor(Math.random() * max) + min;
-    const num2 = Math.floor(Math.random() * (num1 + 1));
-    return { num1, num2 };
-  }
-  return {
-    num1: Math.floor(Math.random() * max) + min,
-    num2: Math.floor(Math.random() * max) + min,
-  };
+  let q: { num1: number; num2: number };
+  do {
+    if (game === 'Minus') {
+      const num1 = Math.floor(Math.random() * max) + min;
+      const num2 = Math.floor(Math.random() * (num1 + 1));
+      q = { num1, num2 };
+    } else {
+      q = {
+        num1: Math.floor(Math.random() * max) + min,
+        num2: Math.floor(Math.random() * max) + min,
+      };
+    }
+  } while (prev && q.num1 === prev.num1 && q.num2 === prev.num2);
+  return q;
 }
 
 export default function GameScreen() {
@@ -129,7 +134,7 @@ export default function GameScreen() {
     inputRef.current = '';
     setInput('');
     setAnswerColor('#212121');
-    const q = randomQuestion(game);
+    const q = randomQuestion(game, questionRef.current);
     questionRef.current = q;
     setQuestion(q);
   }, [game, endRound]);

@@ -64,6 +64,7 @@ const AUDIO_EN = {
     minus: require('../assets/audio/en/menu/minus.mp3'),
     gamesToday: require('../assets/audio/en/menu/games-today.mp3'),
     spelling: require('../assets/audio/en/menu/spelling.mp3'),
+    lscwc: require('../assets/audio/en/menu/lscwc.mp3'),
   },
   correct: [
     require('../assets/audio/en/correct/absolutely-right.mp3'),
@@ -150,6 +151,7 @@ const AUDIO_ZH = {
     minus: require('../assets/audio/zh/menu/minus.mp3'),
     gamesToday: require('../assets/audio/zh/menu/games-today.mp3'),
     spelling: require('../assets/audio/zh/menu/spelling.mp3'),
+    lscwc: require('../assets/audio/zh/menu/lscwc.mp3'),
   },
   correct: [
     require('../assets/audio/zh/correct/da-dui-le.mp3'),

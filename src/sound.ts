@@ -1,32 +1,51 @@
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import { pickRandom } from './assets';
 
-const activeSounds = new Set<Audio.Sound>();
+let currentSound: Audio.Sound | null = null;
+let sequenceId = 0;
 
-function onPlaybackStatus(sound: Audio.Sound, status: AVPlaybackStatus) {
-  if (status.isLoaded && status.didJustFinish) {
-    activeSounds.delete(sound);
-    sound.unloadAsync();
+async function stopCurrent(): Promise<void> {
+  if (currentSound) {
+    const s = currentSound;
+    currentSound = null;
+    try { await s.stopAsync(); } catch {}
+    try { await s.unloadAsync(); } catch {}
   }
 }
 
 export async function playSound(source: number): Promise<void> {
+  sequenceId++;
+  await stopCurrent();
   try {
     const { sound } = await Audio.Sound.createAsync(source);
-    activeSounds.add(sound);
-    sound.setOnPlaybackStatusUpdate(s => onPlaybackStatus(sound, s));
+    currentSound = sound;
+    sound.setOnPlaybackStatusUpdate((status: AVPlaybackStatus) => {
+      if (status.isLoaded && status.didJustFinish) {
+        if (currentSound === sound) currentSound = null;
+        sound.unloadAsync();
+      }
+    });
     await sound.playAsync();
   } catch {}
 }
 
 export async function playSoundSequence(sources: number[]): Promise<void> {
+  const myId = ++sequenceId;
   for (const src of sources) {
+    if (sequenceId !== myId) return;
+    await stopCurrent();
+    if (sequenceId !== myId) return;
     await new Promise<void>((resolve) => {
       Audio.Sound.createAsync(src).then(({ sound }) => {
-        activeSounds.add(sound);
+        if (sequenceId !== myId) {
+          sound.unloadAsync();
+          resolve();
+          return;
+        }
+        currentSound = sound;
         sound.setOnPlaybackStatusUpdate((status) => {
           if (status.isLoaded && status.didJustFinish) {
-            activeSounds.delete(sound);
+            if (currentSound === sound) currentSound = null;
             sound.unloadAsync();
             resolve();
           }
@@ -43,7 +62,6 @@ export async function playRandomSound(clips: number[]): Promise<void> {
 }
 
 export async function unloadAll(): Promise<void> {
-  const pending = [...activeSounds].map(s => s.unloadAsync().catch(() => {}));
-  activeSounds.clear();
-  await Promise.all(pending);
+  sequenceId++;
+  await stopCurrent();
 }

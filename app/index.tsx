@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -65,12 +66,101 @@ function makeInitialPhysics(count: number): PhysicsState[] {
   }));
 }
 
+const CLOUD_COUNT = 5;
+
+interface CloudData {
+  id: number;
+  x: Animated.Value;
+  topPct: number;
+  size: number;
+  opacity: number;
+  speed: number; // px per second
+}
+
+function randomCloudSpeed() { return 8 + Math.random() * 18; }
+function randomCloudSize() { return 0.7 + Math.random() * 0.6; }
+function randomCloudOpacity() { return 0.35 + Math.random() * 0.4; }
+function randomCloudTop() { return Math.random() * 80; }
+
+function CloudShape({ size, opacity }: { size: number; opacity: number }) {
+  const s = size;
+  const color = `rgba(255,255,255,${opacity})`;
+  return (
+    <View style={{ width: 145*s, height: 65*s }}>
+      <View style={{ width: 80*s, height: 50*s, borderRadius: 25*s, backgroundColor: color, position: 'absolute', top: 10*s, left: 0 }} />
+      <View style={{ width: 60*s, height: 60*s, borderRadius: 30*s, backgroundColor: color, position: 'absolute', top: 0, left: 25*s }} />
+      <View style={{ width: 70*s, height: 55*s, borderRadius: 28*s, backgroundColor: color, position: 'absolute', top: 5*s, left: 60*s }} />
+      <View style={{ width: 50*s, height: 50*s, borderRadius: 25*s, backgroundColor: color, position: 'absolute', top: 0, left: 95*s }} />
+      <View style={{ width: 120*s, height: 40*s, borderRadius: 20*s, backgroundColor: color, position: 'absolute', top: 25*s, left: 15*s }} />
+    </View>
+  );
+}
+
+function useClouds(screenW: number) {
+  const nextId = useRef(0);
+  const mkCloud = useCallback((startX?: number): CloudData => {
+    const size = randomCloudSize();
+    const cloudW = 145 * size;
+    const x = new Animated.Value(startX ?? (Math.random() * (screenW + cloudW)));
+    return {
+      id: nextId.current++,
+      x, topPct: randomCloudTop(), size, opacity: randomCloudOpacity(),
+      speed: randomCloudSpeed(),
+    };
+  }, [screenW]);
+
+  const [clouds, setClouds] = useState<CloudData[]>([]);
+  const cloudsRef = useRef(clouds);
+  cloudsRef.current = clouds;
+
+  useEffect(() => {
+    if (screenW <= 0) return;
+    const initial: CloudData[] = [];
+    for (let i = 0; i < CLOUD_COUNT; i++) initial.push(mkCloud());
+    setClouds(initial);
+  }, [screenW > 0]);
+
+  useEffect(() => {
+    if (clouds.length === 0) return;
+    const anims = clouds.map(c => {
+      const cloudW = 145 * c.size;
+      const endX = -cloudW - 20;
+      const currentX = (c.x as any)._value ?? screenW;
+      const dist = currentX - endX;
+      const dur = (dist / c.speed) * 1000;
+      return Animated.timing(c.x, { toValue: endX, duration: dur, useNativeDriver: true });
+    });
+
+    const listeners = clouds.map((c, i) => {
+      return c.x.addListener(({ value }) => {
+        const cloudW = 145 * c.size;
+        if (value <= -cloudW) {
+          c.x.removeAllListeners();
+          anims[i].stop();
+          const fresh = mkCloud(screenW + Math.random() * 100);
+          setClouds(prev => prev.map(p => p.id === c.id ? fresh : p));
+        }
+      });
+    });
+
+    anims.forEach(a => a.start());
+    return () => {
+      anims.forEach(a => a.stop());
+      clouds.forEach((c, i) => c.x.removeListener(listeners[i]));
+    };
+  }, [clouds]);
+
+  return clouds;
+}
+
 export default function HomeScreen() {
   const router = useRouter();
   const { lang, setLang, mode, setMode } = useLang();
   const s = t(lang);
   const audio = getAudio(lang);
   const isMath = mode === 'math';
+  const { width: screenW } = useWindowDimensions();
+  const clouds = useClouds(screenW);
 
   const [gamesToday, setGamesToday] = useState(0);
   useFocusEffect(useCallback(() => { getGamesToday().then(setGamesToday); }, []));
@@ -243,6 +333,11 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.bounceZone} onLayout={onZoneLayout} pointerEvents="box-none">
+        {clouds.map(c => (
+          <Animated.View key={c.id} style={{ position: 'absolute', top: `${c.topPct}%`, transform: [{ translateX: c.x }] } as any}>
+            <CloudShape size={c.size} opacity={c.opacity} />
+          </Animated.View>
+        ))}
         {animRefs.map((anim, i) => (
           <Animated.View key={i} style={[styles.bounceImg, { transform: anim.getTranslateTransform(), opacity: alphaRefs[i] }]}>
             <TouchableOpacity activeOpacity={1} onPress={() => triggerExplosion(i)}>
@@ -320,6 +415,18 @@ export default function HomeScreen() {
               <Text style={styles.todayCount}>{gamesToday}</Text>
               <Text style={styles.todayLabel}>{s.gamesToday}</Text>
             </TouchableOpacity>
+
+            <View style={styles.col}>
+              <TouchableOpacity activeOpacity={0.7} onPress={() => playSound(audio.menu.lscwc)}>
+                <Text style={styles.colLabel}>{s.lscwcShort}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.8} style={styles.gameBtn}
+                onPress={() => { playSound(audio.menu.lscwc); router.push('/lscwc'); }}>
+                <ImageBackground source={BTN_GREEN} style={styles.btnBg} resizeMode="contain">
+                  <Text style={styles.gameBtnText}>{s.start}</Text>
+                </ImageBackground>
+              </TouchableOpacity>
+            </View>
           </>
         )}
       </View>
@@ -361,23 +468,23 @@ const styles = StyleSheet.create({
   titleIcon:     { width: 40, height: 40 },
   titlePink:     { fontSize: 38, fontFamily: 'BubblegumSans_400Regular', color: '#F48FB1' },
   titlePurple:   { fontSize: 38, fontFamily: 'BubblegumSans_400Regular', color: '#B39DDB' },
-  bounceZone:    { flex: 1, overflow: 'hidden', position: 'relative' },
+  bounceZone:    { flex: 1, overflow: 'hidden', position: 'relative', backgroundColor: '#B3E5FC' },
   bounceImg:     { position: 'absolute', width: IMG_SIZE, height: IMG_SIZE, overflow: 'hidden' },
   imgSize:       { width: IMG_SIZE, height: IMG_SIZE },
-  buttonRow:     { flexDirection: 'row', paddingHorizontal: 24, paddingBottom: 16 },
+  buttonRow:     { flexDirection: 'row', paddingHorizontal: 24, paddingTop: 16, paddingBottom: 16 },
   col:           { flex: 1, alignItems: 'center' },
   todayCol:      { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8 },
   todayCount:    { fontSize: 48, fontFamily: 'BubblegumSans_400Regular', color: '#3F51B5' },
   todayLabel:    { fontSize: 12, fontFamily: 'BubblegumSans_400Regular', color: '#9E9E9E', textAlign: 'center' },
-  colLabel:      { fontSize: 30, fontFamily: 'BubblegumSans_400Regular', color: '#9E9E9E', letterSpacing: 1.5, marginBottom: 10 },
+  colLabel:      { fontSize: 30, fontFamily: 'BubblegumSans_400Regular', color: '#212121', letterSpacing: 1.5, marginBottom: 10 },
   gameBtn:       { width: '100%', alignItems: 'center', marginBottom: 4 },
   btnBg:         { width: '100%', height: 90, justifyContent: 'center', alignItems: 'center' },
   gameBtnText:   { color: '#fff', fontSize: 26, fontFamily: 'BubblegumSans_400Regular',
                    textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 3 },
 
-  bottomRow:     { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 20 },
-  bottomBtn:     {},
-  btnBgBottom:   { width: 160, height: 80, justifyContent: 'center', alignItems: 'center' },
+  bottomRow:     { flexDirection: 'row', justifyContent: 'center', gap: 4, marginBottom: 20, paddingHorizontal: 8 },
+  bottomBtn:     { flex: 1, maxWidth: 160 },
+  btnBgBottom:   { width: '100%', height: 80, justifyContent: 'center', alignItems: 'center' },
   bottomBtnText: { color: '#fff', fontSize: 20, fontFamily: 'BubblegumSans_400Regular',
                    textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 3 },
 });

@@ -27,6 +27,7 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="game" />
         <Stack.Screen name="spelling" />
+        <Stack.Screen name="lscwc" />
         <Stack.Screen name="history" />
         <Stack.Screen name="stats" />
       </Stack>
